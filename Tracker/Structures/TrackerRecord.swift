@@ -11,9 +11,11 @@ struct TrackerRecord {
     
     let trackerId : UUID
     let date: Date
+    var daysCompleted: Int
     
-    init(trackerId: UUID, date: Date) {
+    init(trackerId: UUID, daysCompleted: Int = 0, date: Date) {
         self.trackerId = trackerId
+        self.daysCompleted = daysCompleted
         self.date = date
     }
 }

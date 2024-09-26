@@ -7,7 +7,9 @@
 
 import UIKit
 
-class NewHabitViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class NewHabitViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
+    
+    var selectedSchedule: [Weekday] = []
     
     // MARK: - UI Elements
     let titleLabel: UILabel = {
@@ -16,12 +18,14 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
         titleLabel.text = "Новая привычка"
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         titleLabel.textAlignment = .center
+        
         return titleLabel
     }()
     
     let textField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
+        textField.returnKeyType = .go
         
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.heightAnchor.constraint(equalToConstant: 75).isActive = true
@@ -47,7 +51,6 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
         // Радиус скругления
         tableView.layer.cornerRadius = 16
         tableView.layer.masksToBounds = true
-        tableView.separatorStyle = .none
         
         return tableView
     }()
@@ -107,15 +110,33 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Добавляем жест для скрытия клавиатуры при нажатии на любое место
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapOutside))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+        
+        textField.delegate = self
+        
+        validateForm()
+        
         // Регистрация Supplementary View
         collectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.identifier)
+        
+        // Добавляем таргет для кнопки отмены
+        cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+        createButton.addTarget(self, action: #selector(createButtonTapped), for: .touchUpInside)
+        
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
         // Регистрация ячеек
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "emojiCell")
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "colorCell")
         
+        // Регистрация table view
+        tableView.register(CustomTableViewCellForNewHabit.self, forCellReuseIdentifier: "CustomCellForNewHabit")
+        
         view.backgroundColor = .white
-        title = "Новая привычка"
+//        title = "Новая привычка"
         
         // Setup table view
         tableView.delegate = self
@@ -131,8 +152,27 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
         setupUI()
     }
     
-    @objc func hideKeyboard() {
-        view.endEditing(true)
+    // Реализация делегата
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // Закрытие клавиатуры
+        validateForm() // Проверка формы после подтверждения изменений
+        return true
+    }
+    
+    @objc func handleTapOutside() {
+        // Скрываем клавиатуру
+        textField.resignFirstResponder()
+
+        // Выполняем проверку формы, как в методе `textFieldShouldReturn`
+        validateForm()
+    }
+    
+    @objc private func cancelButtonTapped() {
+        dismiss(animated: true, completion: nil) // Закрываем экран без сохранения изменений
+    }
+    
+    @objc private func textFieldDidChange() {
+        validateForm()
     }
     
     // MARK: - Setup UI
@@ -170,7 +210,8 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
             collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 16),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            collectionView.heightAnchor.constraint(equalToConstant: calculateCollectionHeight()),
+//            collectionView.heightAnchor.constraint(equalToConstant: calculateCollectionHeight()),
+            collectionView.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -16),
             
             // Layout для buttonStackView
             buttonStackView.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
@@ -181,17 +222,44 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
         ])
     }
     
+    func validateForm() {
+        let isTrackerNameValid = !(textField.text?.isEmpty ?? true)
+        let isScheduleSelected = !selectedSchedule.isEmpty
+        let isCategorySelected = true // Заменить на логику проверки выбранной категории
+        
+        if isTrackerNameValid && isScheduleSelected && isCategorySelected {
+            createButton.isEnabled = true
+            createButton.backgroundColor = UIColor(named: "LB_black")
+        } else {
+            createButton.isEnabled = false
+            createButton.backgroundColor = UIColor(named: "LB_grey")
+        }
+    }
+    
     // MARK: - Table view delegate and data source
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tableData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = tableData[indexPath.row]
-        cell.accessoryType = .disclosureIndicator
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 17)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCellForNewHabit", for: indexPath) as! CustomTableViewCellForNewHabit
+        cell.titleLabel.text = tableData[indexPath.row]
+
+        if indexPath.row == 1 {
+            // Проверяем, выбраны ли все дни недели
+            if selectedSchedule.count == Weekday.allCases.count {
+                cell.descriptionLabel.text = "Каждый день"
+            } else {
+                // Если выбраны не все дни, сортируем их по порядку недели и выводим сокращенные названия
+                let sortedDays = selectedSchedule.sorted { Weekday.orderedWeekdays.firstIndex(of: $0)! < Weekday.orderedWeekdays.firstIndex(of: $1)! }
+                cell.descriptionLabel.text = sortedDays.isEmpty ? "" : sortedDays.map { $0.shortName }.joined(separator: ", ")
+            }
+        } else if indexPath.row == 0 {
+            cell.descriptionLabel.text = "Важное"
+        }
+
         cell.backgroundColor = .clear
+        cell.accessoryType = .disclosureIndicator
         return cell
     }
     
@@ -252,7 +320,6 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
         }
     }
     
-    // Layout for collection view items
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if indexPath.section == 1 {
             // Размер ячеек для секции с палитрой цветов
@@ -284,5 +351,66 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
         ).height
         
         return emojiHeight + colorsHeight + (headerHeight * 2) // Учитываем два заголовка
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row == 1 { // Для строки с "Расписание"
+            let scheduleVC = ScheduleViewController()
+            scheduleVC.selectedDays = Set(selectedSchedule)
+            scheduleVC.onScheduleSelected = { [weak self] selectedDays in
+                self?.selectedSchedule = Array(selectedDays) // Сохраняем выбранные дни
+                self?.tableView.reloadData() // Обновляем таблицу для отображения новых данных
+                self?.validateForm() // Проверяем состояние формы
+            }
+            
+            let navController = UINavigationController(rootViewController: scheduleVC)
+            present(navController, animated: true, completion: nil)
+        }
+    }
+    
+    @objc func createButtonTapped() {
+        
+        // Проверяем, введено ли имя трекера
+        guard let trackerName = textField.text, !trackerName.isEmpty else {
+            // Показываем предупреждение, если имя не введено
+            return
+        }
+        
+        // Категория по умолчанию (вы можете реализовать выбор категории позже)
+        let categoryTitle = "Обучение"
+        
+        // Выбираем цвет и эмодзи. Для упрощения выберем первый вариант из списка (позже можно добавить логику выбора)
+        let selectedColor = colors.first ?? .lbCS13Peach
+        let selectedEmoji = emojis.first ?? "😊"
+        
+        // Создаем новый трекер
+        let newTracker = Tracker(
+            id: UUID(),
+            name: trackerName,
+            color: selectedColor,
+            emoji: selectedEmoji,
+            schedule: selectedSchedule // Используем выбранное расписание
+        )
+        
+        if let parentVC = ((presentingViewController?.presentingViewController as? TabBarController)?.selectedViewController as? UINavigationController)?.viewControllers.first(where: { $0 is TrackersViewController }) as? TrackersViewController {
+            // Используем навигационный стек, если нашли контроллер
+            parentVC.addTracker(newTracker, to: categoryTitle)
+            // После добавления трекера фильтруем трекеры для выбранной даты
+            let currentWeekday = parentVC.getWeekday(from: parentVC.selectedDate)
+            parentVC.filterCategories(by: currentWeekday)
+            
+            parentVC.collectionView.reloadData() // Обновляем данные на экране
+            navigationController?.popViewController(animated: true) // Возвращаемся к предыдущему экрану
+        } else if let parentVC = presentingViewController?.presentingViewController as? TrackersViewController {
+            // Если контроллер был представлен модально
+            parentVC.addTracker(newTracker, to: categoryTitle)
+            parentVC.collectionView.reloadData() // Обновляем данные на экране
+            dismiss(animated: true, completion: nil) // Закрываем экран создания
+        } else {
+            // Обработка случая, если контроллер не был найден
+            print("Не удалось найти TrackersViewController")
+        }
+        // Закрываем все модальные окна
+        presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
     }
 }

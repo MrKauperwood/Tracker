@@ -42,7 +42,7 @@ class TrackerTypeSelectionViewController: UIViewController {
         habitButton.titleLabel?.textAlignment = .center
         habitButton.addTarget(self, action: #selector(habitButtonTapped), for: .touchUpInside)
         view.addSubview(habitButton)
-
+        
         // Кнопка Нерегулярные события
         let irregularButton = UIButton(type: .system)
         irregularButton.translatesAutoresizingMaskIntoConstraints = false

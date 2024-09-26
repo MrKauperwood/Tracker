@@ -15,12 +15,15 @@ struct Tracker {
     let emoji: String
     let schedule: [Weekday]
     
-    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday]) {
-        self.id = UUID()
+    var completedDates: [Date]
+    
+    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday], completedDates: [Date] = []) {
+        self.id = id 
         self.name = name
         self.color = color
         self.emoji = emoji
         self.schedule = schedule
+        self.completedDates = completedDates
     }
 }
 
@@ -32,4 +35,28 @@ enum Weekday: String, CaseIterable {
     case friday = "Пятница"
     case saturday = "Суббота"
     case sunday = "Воскресенье"
+    
+    var shortName: String {
+        switch self {
+        case .monday:
+            return "Пн"
+        case .tuesday:
+            return "Вт"
+        case .wednesday:
+            return "Ср"
+        case .thursday:
+            return "Чт"
+        case .friday:
+            return "Пт"
+        case .saturday:
+            return "Сб"
+        case .sunday:
+            return "Вс"
+        }
+    }
+    
+    // Метод для упорядочивания дней недели
+    static let orderedWeekdays: [Weekday] = [
+        .monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday
+    ]
 }
