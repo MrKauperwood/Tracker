@@ -41,6 +41,22 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
         return textField
     }()
     
+    let clearButtonContainer: UIView = {
+        // Учитывая ширину кнопки (17) и отступ (12), создаем контейнер с шириной 29
+        let container = UIView(frame: CGRect(x: 0, y: 0, width: 29, height: 17))
+        return container
+    }()
+    
+    let clearButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        button.tintColor = .gray
+        button.frame = CGRect(x: 0, y: 0, width: 17, height: 17)
+        button.addTarget(self, action: #selector(clearTextField), for: .touchUpInside)
+        button.isHidden = true // Изначально скрыта
+        return button
+    }()
+    
     let tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -110,6 +126,23 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Настройка крестика с отступом
+        clearButton.translatesAutoresizingMaskIntoConstraints = false
+        clearButtonContainer.addSubview(clearButton)
+        
+        NSLayoutConstraint.activate([
+            clearButton.leadingAnchor.constraint(equalTo: clearButtonContainer.leadingAnchor), // Крестик уходит влево
+            clearButton.centerYAnchor.constraint(equalTo: clearButtonContainer.centerYAnchor),
+            clearButton.widthAnchor.constraint(equalToConstant: 17),
+            clearButton.heightAnchor.constraint(equalToConstant: 17),
+            
+            clearButton.trailingAnchor.constraint(equalTo: clearButtonContainer.trailingAnchor, constant: -12)
+        ])
+        
+        // Устанавливаем контейнер с кнопкой в качестве правого вида для UITextField
+        textField.rightView = clearButtonContainer
+        textField.rightViewMode = .whileEditing
+        
         // Добавляем жест для скрытия клавиатуры при нажатии на любое место
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapOutside))
         tapGesture.cancelsTouchesInView = false
@@ -170,9 +203,16 @@ class NewHabitViewController: UIViewController, UITableViewDelegate, UITableView
     @objc private func cancelButtonTapped() {
         dismiss(animated: true, completion: nil) // Закрываем экран без сохранения изменений
     }
-    
+        
     @objc private func textFieldDidChange() {
+        clearButton.isHidden = textField.text?.isEmpty ?? true
         validateForm()
+    }
+    
+    @objc private func clearTextField() {
+        textField.text = ""
+        clearButton.isHidden = true
+        validateForm() // Обновляем форму после очистки поля
     }
     
     // MARK: - Setup UI
