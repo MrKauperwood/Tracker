@@ -14,16 +14,15 @@ struct Tracker {
     let color: UIColor
     let emoji: String
     let schedule: [Weekday]
+    let trackerType: TrackerType
     
-    var completedDates: [Date]
-    
-    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday], completedDates: [Date] = []) {
-        self.id = id 
+    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday], trackerType: TrackerType, completedDates: [Date] = []) {
+        self.id = id
         self.name = name
         self.color = color
         self.emoji = emoji
         self.schedule = schedule
-        self.completedDates = completedDates
+        self.trackerType = trackerType
     }
 }
 
@@ -59,4 +58,30 @@ enum Weekday: String, CaseIterable {
     static let orderedWeekdays: [Weekday] = [
         .monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday
     ]
+}
+
+extension Weekday {
+    static func from(date: Date) -> Weekday? {
+        let calendar = Calendar.current
+        let weekdayNumber = calendar.component(.weekday, from: date) // 1 - Воскресенье, 2 - Понедельник и т.д.
+        
+        switch weekdayNumber {
+        case 1:
+            return .sunday
+        case 2:
+            return .monday
+        case 3:
+            return .tuesday
+        case 4:
+            return .wednesday
+        case 5:
+            return .thursday
+        case 6:
+            return .friday
+        case 7:
+            return .saturday
+        default:
+            return nil
+        }
+    }
 }

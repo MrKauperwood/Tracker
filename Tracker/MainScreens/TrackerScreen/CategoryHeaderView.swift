@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CategoryHeaderView: UICollectionReusableView {
+final class CategoryHeaderView: UICollectionReusableView {
     private let titleLabel = UILabel()
     
     override init(frame: CGRect) {
@@ -21,6 +21,7 @@ class CategoryHeaderView: UICollectionReusableView {
     
     func configure(with title: String) {
         titleLabel.text = title
+        Logger.log("Заголовок категории установлен: \(title)", level: .info)
     }
     
     private func setupViews() {
@@ -34,5 +35,6 @@ class CategoryHeaderView: UICollectionReusableView {
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
+        Logger.log("Настройка элементов CategoryHeaderView завершена", level: .debug)
     }
 }

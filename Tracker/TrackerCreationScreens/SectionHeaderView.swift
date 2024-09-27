@@ -7,15 +7,25 @@
 
 import UIKit
 
-class SectionHeaderView: UICollectionReusableView {
+final class SectionHeaderView: UICollectionReusableView {
     static let identifier = "SectionHeaderView"
 
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
         return label
     }()
+    
+    public var title: String? {
+        get {
+            return titleLabel.text
+        }
+        set {
+            titleLabel.text = newValue
+            Logger.log("Установлен заголовок секции: \(newValue ?? "nil")")
+        }
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -28,6 +38,7 @@ class SectionHeaderView: UICollectionReusableView {
     }
 
     required init?(coder: NSCoder) {
+        Logger.log("SectionHeaderView инициализируется через NSCoder", level: .error)
         fatalError("init(coder:) has not been implemented")
     }
 }

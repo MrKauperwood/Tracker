@@ -8,15 +8,19 @@
 import Foundation
 import UIKit
 
-
-class TrackerTypeSelectionViewController: UIViewController {
+final class TrackerTypeSelectionViewController: UIViewController {
+    
+    // MARK: - Overrides Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        Logger.log("Экран выбора типа трекера загружен")
         
         view.backgroundColor = .white
         setupUI()
     }
+    
+    // MARK: - Private Methods
     
     private func setupUI() {
         // Заголовок
@@ -28,7 +32,7 @@ class TrackerTypeSelectionViewController: UIViewController {
         view.addSubview(titleLabel)
         
         // Настройка шрифта для кнопок
-        let buttonFont = UIFont(name: "SF Pro", size: 16) ?? UIFont.systemFont(ofSize: 16) // если SF Pro не найден, будет системный шрифт
+        let buttonFont = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         let buttonTextColor = UIColor.white
         
         // Кнопка Привычка
@@ -46,7 +50,7 @@ class TrackerTypeSelectionViewController: UIViewController {
         // Кнопка Нерегулярные события
         let irregularButton = UIButton(type: .system)
         irregularButton.translatesAutoresizingMaskIntoConstraints = false
-        irregularButton.setTitle("Нерегулярные события", for: .normal)
+        irregularButton.setTitle("Нерегулярное событие", for: .normal)
         irregularButton.backgroundColor = .black
         irregularButton.setTitleColor(buttonTextColor, for: .normal)
         irregularButton.titleLabel?.font = buttonFont
@@ -75,11 +79,14 @@ class TrackerTypeSelectionViewController: UIViewController {
     @objc private func habitButtonTapped() {
         Logger.log("Выбрано создание привычки")
         let newHabitVC = NewHabitViewController()
+        newHabitVC.trackerType = .habit
         present(newHabitVC, animated: true, completion: nil)
     }
     
     @objc private func irregularButtonTapped() {
         Logger.log("Выбрано создание Нерегулярного события")
+        let newHabitVC = NewHabitViewController()
+        newHabitVC.trackerType = .irregular // Указываем, что создается нерегулярное событие
+        present(newHabitVC, animated: true, completion: nil)
     }
-    
 }

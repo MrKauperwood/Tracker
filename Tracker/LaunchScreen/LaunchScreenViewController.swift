@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class LaunchScreenViewController: UIViewController {
+final class LaunchScreenViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()

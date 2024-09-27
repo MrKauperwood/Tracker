@@ -14,7 +14,7 @@ enum LogLevel: String {
     case error = "ERROR"
 }
 
-class Logger {
+final class Logger {
     
     static func log(_ message: String, level: LogLevel = .info, fileID: String = #fileID, functionName: String = #function) {
         let formattedTime = currentTimestamp()

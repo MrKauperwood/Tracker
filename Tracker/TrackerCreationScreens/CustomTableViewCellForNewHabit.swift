@@ -7,22 +7,33 @@
 
 import UIKit
 
-class CustomTableViewCellForNewHabit: UITableViewCell {
+final class CustomTableViewCellForNewHabit: UITableViewCell {
     
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17, weight: .regular) // Настройка шрифта для заголовка
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    let descriptionLabel: UILabel = {
+    private let descriptionLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 17, weight: .regular) // Настройка шрифта для описания
         label.textColor = .lbGrey
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    // Публичные методы для настройки текста
+    func configureTitle(_ text: String) {
+        titleLabel.text = text
+        Logger.log("Заголовок ячейки установлен: \(text)", level: .debug)
+    }
+    
+    func configureDescription(_ text: String) {
+        descriptionLabel.text = text
+        Logger.log("Описание ячейки установлено: \(text)", level: .debug)
+    }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)

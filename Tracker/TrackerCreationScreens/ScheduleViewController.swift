@@ -7,9 +7,9 @@
 
 import UIKit
 
-class ScheduleViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+final class ScheduleViewController: UIViewController {
     
-    let titleLabel: UILabel = {
+    private let titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -19,13 +19,13 @@ class ScheduleViewController: UIViewController, UITableViewDelegate, UITableView
         return titleLabel
     }()
     
-    let tableView = UITableView() // Таблица для отображения дней недели
+    private let tableView = UITableView() // Таблица для отображения дней недели
     var selectedDays: Set<Weekday> = [] // Массив для хранения выбранных дней
     
     var onScheduleSelected: ((Set<Weekday>) -> Void)?
     var tableHeightConstraint: NSLayoutConstraint? // Переменная для хранения констрейнта высоты таблицы
     
-    let doneButton: UIButton = {
+    private let doneButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -105,6 +105,7 @@ class ScheduleViewController: UIViewController, UITableViewDelegate, UITableView
         // Обновляем высоту таблицы на основе контента
         updateTableViewHeight()
         
+        Logger.log("Экран расписания загружен")
     }
     
     func updateTableViewHeight() {
@@ -113,9 +114,53 @@ class ScheduleViewController: UIViewController, UITableViewDelegate, UITableView
         
         // Обновляем значение существующего констрейнта высоты таблицы
         tableHeightConstraint?.constant = tableHeight
+        Logger.log("Высота таблицы обновлена: \(tableView.contentSize.height)", level: .debug)
     }
     
-    // MARK: - UITableViewDataSource
+    // MARK: - UISwitch Action
+    @objc func switchChanged(_ sender: UISwitch) {
+        let day = Weekday.allCases[sender.tag]
+        
+        // Если переключатель включен, добавляем день в список выбранных
+        if sender.isOn {
+            selectedDays.insert(day)
+        } else {
+            selectedDays.remove(day)
+        }
+        Logger.log("Изменение дня: \(day.rawValue) - \(sender.isOn ? "добавлен" : "удален")", level: .debug)
+    }
+    
+    @objc func doneButtonTapped() {
+        onScheduleSelected?(selectedDays) // Передаем выбранные дни обратно
+        dismiss(animated: true, completion: nil)
+        Logger.log("Выбранные дни: \(selectedDays.map { $0.rawValue }.joined(separator: ", "))")
+    }
+}
+
+
+// MARK: - UITableViewDelegate
+extension ScheduleViewController: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if indexPath.row == 1 { // Предположим, что строка с "Расписание" — вторая в списке (индекс 1)
+            let scheduleVC = ScheduleViewController()
+            scheduleVC.selectedDays = self.selectedDays // Передаем текущие выбранные дни в контроллер расписания
+            scheduleVC.onScheduleSelected = { [weak self] selectedDays in
+                self?.selectedDays = selectedDays
+            }
+            navigationController?.pushViewController(scheduleVC, animated: true)
+        }
+        Logger.log("Выбрана строка с индексом \(indexPath.row)")
+    }
+}
+
+
+// MARK: - UITableViewDataSource
+extension ScheduleViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return Weekday.allCases.count
@@ -133,46 +178,13 @@ class ScheduleViewController: UIViewController, UITableViewDelegate, UITableView
         // Создаем UISwitch
         let switchView = UISwitch(frame: .zero)
         switchView.isOn = selectedDays.contains(day)
+        switchView.onTintColor = .lbBlue
         switchView.tag = indexPath.row // Используем тег для отслеживания изменения
         switchView.addTarget(self, action: #selector(switchChanged(_:)), for: .valueChanged)
         cell.accessoryView = switchView
         
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 1 { // Предположим, что строка с "Расписание" — вторая в списке (индекс 1)
-            let scheduleVC = ScheduleViewController()
-            scheduleVC.selectedDays = self.selectedDays // Передаем текущие выбранные дни в контроллер расписания
-            scheduleVC.onScheduleSelected = { [weak self] selectedDays in
-                self?.selectedDays = selectedDays
-                // Обновите интерфейс или данные, если необходимо
-                print("Выбранные дни: \(selectedDays)")
-            }
-            navigationController?.pushViewController(scheduleVC, animated: true)
-        }
-    }
-    
-    // MARK: - UITableViewDelegate
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 75
-    }
-    
-    // MARK: - UISwitch Action
-    @objc func switchChanged(_ sender: UISwitch) {
-        let day = Weekday.allCases[sender.tag]
+        Logger.log("Создана ячейка для дня: \(Weekday.allCases[indexPath.row].rawValue)", level: .debug)
         
-        // Если переключатель включен, добавляем день в список выбранных
-        if sender.isOn {
-            selectedDays.insert(day)
-        } else {
-            selectedDays.remove(day)
-        }
-    }
-    
-    @objc func doneButtonTapped() {
-        onScheduleSelected?(selectedDays) // Передаем выбранные дни обратно
-        dismiss(animated: true, completion: nil)
+        return cell
     }
 }

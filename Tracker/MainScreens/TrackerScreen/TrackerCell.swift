@@ -7,9 +7,8 @@
 
 import UIKit
 
-class TrackerCell: UICollectionViewCell {
+final class TrackerCell: UICollectionViewCell {
     
-    private var selectedDate: Date?
     var increaseDayCounterButtonTapped: ((Int) -> Void)? // Обработчик нажатия на кнопку
     private var isTrackerCompleted: Bool = false
     
@@ -84,6 +83,7 @@ class TrackerCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        Logger.log("Инициализирована ячейка TrackerCell с размером \(frame)", level: .debug)
         
         topContainerView.addSubview(emojiLabel)
         topContainerView.addSubview(nameLabel)
@@ -136,7 +136,7 @@ class TrackerCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(with tracker: Tracker, daysCompleted: Int, isCompleted: Bool) {
+    func configure(with tracker: Tracker, daysCompletedText: String, isCompleted: Bool) {
         emojiLabel.text = tracker.emoji
         nameLabel.text = tracker.name
         topContainerView.backgroundColor = tracker.color
@@ -147,51 +147,13 @@ class TrackerCell: UICollectionViewCell {
         // Обновляем UI в зависимости от состояния трекера
         updateButtonAppearance()
         
-        // Получаем правильное окончание для слова "день"
-        let dayWord = getDayWord(for: daysCompleted)
-        
-        // Устанавливаем текст
-        daysLabel.text = "\(daysCompleted) \(dayWord)"
-    }
-    
-    private func getDayWord(for count: Int) -> String {
-        let lastDigit = count % 10
-        let lastTwoDigits = count % 100
-        
-        // Числа от 11 до 14
-        if lastTwoDigits >= 11 && lastTwoDigits <= 14 {
-            return "дней"
-        }
-        
-        // Числа, оканчивающиеся на 1, но не 11
-        if lastDigit == 1 {
-            return "день"
-        }
-        
-        // Числа, оканчивающиеся на 2, 3, 4, но не 12, 13, 14
-        if lastDigit >= 2 && lastDigit <= 4 {
-            return "дня"
-        }
-        
-        // Все остальные случаи
-        return "дней"
+        daysLabel.text = daysCompletedText
+        Logger.log("Конфигурация ячейки для трекера: \(tracker.name), количество дней: \(daysCompletedText), выполнен: \(isCompleted)", level: .info)
     }
     
     @objc func increaseDayCounter() {
-        if isTrackerCompleted {
-            // Трекер был выполнен, снимаем отметку
-            isTrackerCompleted = false
-            increaseDayCounterButtonTapped?(-1)
-        } else {
-            // Трекер не был выполнен, отмечаем как выполненный
-            isTrackerCompleted = true
-            increaseDayCounterButtonTapped?(1)
-        }
-        
-        // Обновляем внешний вид кнопки
-        updateButtonAppearance()
-        
-        Logger.log("Кнопка Изменить счетчик была нажата")
+        increaseDayCounterButtonTapped?(isTrackerCompleted ? -1 : 1)
+        Logger.log("Кнопка увеличения дня нажата, текущее состояние: \(isTrackerCompleted ? "выполнено" : "не выполнено")", level: .debug)
     }
     
     private func updateButtonAppearance() {
@@ -201,12 +163,17 @@ class TrackerCell: UICollectionViewCell {
             increaseDayButton.tintColor = .white
             increaseDayButton.setTitle(nil, for: .normal)
             increaseDayButton.imageView?.contentMode = .scaleAspectFit // Устанавливаем корректный режим отображения
-            increaseDayButton.bringSubviewToFront(increaseDayButton.imageView!) // Выводим изображение поверх остальных слоев
+            
+            if let imageView = increaseDayButton.imageView {
+                increaseDayButton.bringSubviewToFront(imageView)
+            }
+            
             increaseDayButton.backgroundColor = topContainerView.backgroundColor?.withAlphaComponent(0.3)
         } else {
             increaseDayButton.setImage(nil, for: .normal)
             increaseDayButton.setTitle("+", for: .normal)
             increaseDayButton.backgroundColor = topContainerView.backgroundColor
         }
+        Logger.log("Обновление внешнего вида кнопки: \(isTrackerCompleted ? "завершён" : "не завершён")", level: .debug)
     }
 }
