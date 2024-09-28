@@ -90,7 +90,6 @@ final class TrackersViewController: UIViewController {
             let filteredTrackers = category.trackers.filter { tracker in
                 if tracker.trackerType == .irregular {
                     // Логика для нерегулярных трекеров
-//                    let isCompleted = tracker.completedDates.contains { Calendar.current.isDate($0, inSameDayAs: selectedDate) }
                     let isCompleted = completedTrackers.contains { record in
                         record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: selectedDate)
                     }

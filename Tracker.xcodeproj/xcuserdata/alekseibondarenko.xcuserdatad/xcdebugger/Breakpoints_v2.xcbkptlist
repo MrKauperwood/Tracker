@@ -14,8 +14,8 @@
             filePath = "Tracker/MainScreens/TrackerScreen/TrackersViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "370"
-            endingLineNumber = "370"
+            startingLineNumber = "369"
+            endingLineNumber = "369"
             landmarkName = "addTracker(_:to:)"
             landmarkType = "7">
          </BreakpointContent>
