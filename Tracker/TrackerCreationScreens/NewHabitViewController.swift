@@ -48,6 +48,16 @@ final class NewHabitViewController: UIViewController {
         return textField
     }()
     
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textColor = .lbRed
+        label.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        label.textAlignment = .center
+        label.isHidden = true // Изначально скрыта
+        return label
+    }()
+    
     private let clearButtonContainer: UIView = {
         // Учитывая ширину кнопки (17) и отступ (12), создаем контейнер с шириной 29
         let container = UIView(frame: CGRect(x: 0, y: 0, width: 29, height: 17))
@@ -203,6 +213,7 @@ final class NewHabitViewController: UIViewController {
     private func setupUI() {
         view.addSubview(titleLabel)
         view.addSubview(textField)
+        view.addSubview(errorLabel)
         view.addSubview(tableView)
         view.addSubview(collectionView)
         
@@ -224,11 +235,14 @@ final class NewHabitViewController: UIViewController {
             textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
+            // ErrorLabel's layout
+            errorLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 8),
+            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
             // Tracker's settings Table view layout
-            tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 16),
+            tableView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 24),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            //            tableView.heightAnchor.constraint(equalToConstant: 150),
             tableView.heightAnchor.constraint(equalToConstant: CGFloat(75 * tableData.count)),
             
             // Emoji collection view layout
@@ -262,6 +276,14 @@ final class NewHabitViewController: UIViewController {
     @objc private func textFieldDidChange() {
         clearButton.isHidden = textField.text?.isEmpty ?? true
         validateForm()
+        
+        // Проверяем длину текста
+        if let text = textField.text, text.count > 38 {
+            errorLabel.text = "Ограничение 38 символов"
+            errorLabel.isHidden = false
+        } else {
+            errorLabel.isHidden = true
+        }
     }
     
     @objc private func clearTextField() {
@@ -271,7 +293,7 @@ final class NewHabitViewController: UIViewController {
     }
     
     private func validateForm() {
-        let isTrackerNameValid = !(textField.text?.isEmpty ?? true)
+        let isTrackerNameValid = !(textField.text?.isEmpty ?? true) && (textField.text?.count ?? 0) <= 38
         
         let isScheduleSelected = trackerType == .habit ? !selectedSchedule.isEmpty : true
         let isCategorySelected = true // Заменить на логику проверки выбранной категории
