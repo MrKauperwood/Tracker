@@ -19,6 +19,20 @@ final class NewHabitViewController: UIViewController {
     
     // MARK: - UI Elements
     
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+    
+    private let contentStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
     private let titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -211,53 +225,55 @@ final class NewHabitViewController: UIViewController {
     // MARK: - Private Methods
     
     private func setupUI() {
-        view.addSubview(titleLabel)
-        view.addSubview(textField)
-        view.addSubview(errorLabel)
-        view.addSubview(tableView)
-        view.addSubview(collectionView)
+        // Добавляем scrollView на главный view
+        view.addSubview(scrollView)
+        
+        // Добавляем contentStackView внутрь scrollView
+        scrollView.addSubview(contentStackView)
         
         // Добавляем кнопки в стек
         buttonStackView.addArrangedSubview(cancelButton)
         buttonStackView.addArrangedSubview(createButton)
         
-        view.addSubview(buttonStackView)
+        // Добавляем все элементы в contentStackView
+        contentStackView.addArrangedSubview(titleLabel)
+        contentStackView.addArrangedSubview(textField)
+        contentStackView.addArrangedSubview(errorLabel)
+        contentStackView.addArrangedSubview(tableView)
+        contentStackView.addArrangedSubview(collectionView)
+        contentStackView.addArrangedSubview(buttonStackView)
         
-        // Layout constraints
+        // Констрейнты для scrollView
         NSLayoutConstraint.activate([
-            
-            // Title layout
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            // Tracker's name text field layout
-            textField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
-            textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
-            // ErrorLabel's layout
-            errorLabel.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 8),
-            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            // Tracker's settings Table view layout
-            tableView.topAnchor.constraint(equalTo: errorLabel.bottomAnchor, constant: 24),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: CGFloat(75 * tableData.count)),
-            
-            // Emoji collection view layout
-            collectionView.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 16),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            //            collectionView.heightAnchor.constraint(equalToConstant: calculateCollectionHeight()),
-            collectionView.bottomAnchor.constraint(equalTo: buttonStackView.topAnchor, constant: -16),
-            
-            // Layout для buttonStackView
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+        
+        // Констрейнты для contentStackView
+        NSLayoutConstraint.activate([
+            contentStackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
+            contentStackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
+            contentStackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),
+            contentStackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentStackView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -32)
+        ])
+        
+        // Констрейнты для tableView (например, высота зависит от количества строк)
+        NSLayoutConstraint.activate([
+            tableView.heightAnchor.constraint(equalToConstant: CGFloat(75 * tableData.count)) // Высота таблицы
+        ])
+        
+        // Констрейнты для collectionView (можно вычислять динамически при необходимости)
+        NSLayoutConstraint.activate([
+            collectionView.heightAnchor.constraint(equalToConstant: calculateCollectionHeight())
+        ])
+        
+        // Констрейнты для buttonStackView (если требуется фиксированная высота)
+        NSLayoutConstraint.activate([
             buttonStackView.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
-            buttonStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            buttonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            buttonStackView.heightAnchor.constraint(equalToConstant: 60),
-            buttonStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            buttonStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
@@ -290,6 +306,7 @@ final class NewHabitViewController: UIViewController {
         textField.text = ""
         clearButton.isHidden = true
         validateForm() // Обновляем форму после очистки поля
+        errorLabel.isHidden = true
     }
     
     private func validateForm() {
