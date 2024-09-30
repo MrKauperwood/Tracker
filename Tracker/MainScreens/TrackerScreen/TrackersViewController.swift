@@ -237,7 +237,7 @@ extension TrackersViewController: UICollectionViewDataSource {
         } else {
             
             // Общее количество выполнений трекера
-            let daysCompleted = completedTrackers.count
+            let daysCompleted = completedTrackers.filter { $0.trackerId == tracker.id }.count
             
             // Передаем состояние и выбранную дату в ячейку
             let daysCompletedText = "\(daysCompleted) \(DayWordFormatter.getDayWord(for: daysCompleted))"

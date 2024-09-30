@@ -16,6 +16,8 @@ final class NewHabitViewController: UIViewController {
     // MARK: - Private Properties
     
     private var selectedSchedule: [Weekday] = []
+    private var selectedEmoji: String?
+    private var selectedColor: UIColor?
     
     // MARK: - UI Elements
     
@@ -106,6 +108,7 @@ final class NewHabitViewController: UIViewController {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.isScrollEnabled = false // Отключаем скроллинг коллекции
         return collectionView
     }()
     
@@ -272,7 +275,7 @@ final class NewHabitViewController: UIViewController {
         
         // Констрейнты для buttonStackView (если требуется фиксированная высота)
         NSLayoutConstraint.activate([
-            buttonStackView.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
+//            buttonStackView.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
             buttonStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
@@ -315,7 +318,11 @@ final class NewHabitViewController: UIViewController {
         let isScheduleSelected = trackerType == .habit ? !selectedSchedule.isEmpty : true
         let isCategorySelected = true // Заменить на логику проверки выбранной категории
         
-        if isTrackerNameValid && isScheduleSelected && isCategorySelected {
+        // Новые условия: проверка выбора эмодзи и цвета
+        let isEmojiSelected = selectedEmoji != nil
+        let isColorSelected = selectedColor != nil
+        
+        if isTrackerNameValid && isScheduleSelected && isCategorySelected && isEmojiSelected && isColorSelected {
             createButton.isEnabled = true
             createButton.backgroundColor = UIColor(named: "LB_black")
         } else {
@@ -323,7 +330,7 @@ final class NewHabitViewController: UIViewController {
             createButton.backgroundColor = UIColor(named: "LB_grey")
         }
         
-        Logger.log("Форма валидна: \(isTrackerNameValid && isScheduleSelected && isCategorySelected)", level: .debug)
+        Logger.log("Форма валидна: \(isTrackerNameValid && isScheduleSelected && isCategorySelected && isEmojiSelected && isColorSelected)", level: .debug)
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -341,7 +348,7 @@ final class NewHabitViewController: UIViewController {
     func calculateCollectionHeight() -> CGFloat {
         let numberOfItemsPerRow: CGFloat = 6
         let itemHeight: CGFloat = 52
-        let spacing: CGFloat = 16
+        let spacing: CGFloat = 10
         
         // Рассчитываем высоту для секции с эмодзи
         let numberOfRowsEmoji = ceil(CGFloat(emojis.count) / numberOfItemsPerRow)
@@ -351,30 +358,32 @@ final class NewHabitViewController: UIViewController {
         let numberOfRowsColors = ceil(CGFloat(colors.count) / numberOfItemsPerRow)
         let colorsHeight = (numberOfRowsColors * itemHeight) + ((numberOfRowsColors - 1) * spacing)
         
-        // Динамически получаем высоту заголовка
-        let headerHeight = self.collectionView(
-            collectionView,
-            layout: collectionView.collectionViewLayout as! UICollectionViewFlowLayout,
-            referenceSizeForHeaderInSection: 0
-        ).height
+        // Высота заголовков (если у вас фиксированная высота заголовков)
+        let headerHeight: CGFloat = 50.0 // Высота заголовка для каждой секции
         
-        return emojiHeight + colorsHeight + (headerHeight * 2) // Учитываем два заголовка
+        // Общая высота: высота эмодзи + высота цветов + высота заголовков
+        let totalHeight = emojiHeight + colorsHeight + (headerHeight * 2)
+        
+        return totalHeight
     }
     
     @objc func createButtonTapped() {
         
         // Проверяем, введено ли имя трекера
         guard let trackerName = textField.text, !trackerName.isEmpty else {
-            // Показываем предупреждение, если имя не введено
             return
         }
         
         // Категория по умолчанию (вы можете реализовать выбор категории позже)
         let categoryTitle = trackerType == .habit ? "Обучение" : "Нерегулярные события"
         
-        // Выбираем цвет и эмодзи. Для упрощения выберем первый вариант из списка (позже можно добавить логику выбора)
-        let selectedColor = colors.first ?? .lbCS13Peach
-        let selectedEmoji = emojis.first ?? "😊"
+        guard let selectedEmoji = selectedEmoji else {
+            return
+        }
+        
+        guard let selectedColor = selectedColor else {
+            return
+        }
         
         // Создаем новый трекер
         let newTracker = Tracker(
@@ -473,6 +482,73 @@ extension NewHabitViewController: UITableViewDataSource {
 // MARK: - UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
 extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
+    // MARK: - Private Methods
+    private func configureEmojiCell(for collectionView: UICollectionView, at indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "emojiCell", for: indexPath)
+        
+        // Удаляем все подвиды ячейки, чтобы избежать наложения
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        let emojiLabel = UILabel()
+        emojiLabel.text = emojis[indexPath.item]
+        emojiLabel.font = UIFont.systemFont(ofSize: 32)
+        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
+        cell.contentView.addSubview(emojiLabel)
+        
+        NSLayoutConstraint.activate([
+            emojiLabel.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+        ])
+        
+        // Меняем фон ячейки и добавляем закругленные углы, если эмодзи выбрано
+        if selectedEmoji == emojis[indexPath.item] {
+            cell.backgroundColor = .lbLightGrey
+            cell.layer.cornerRadius = 16
+        } else {
+            cell.backgroundColor = .clear
+            cell.layer.cornerRadius = 0
+        }
+        
+        return cell
+    }
+    
+    private func configureColorCell(for collectionView: UICollectionView, at indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "colorCell", for: indexPath)
+        
+        // Удаляем все подвиды, чтобы избежать дублирования при повторном использовании ячейки
+        cell.contentView.subviews.forEach { $0.removeFromSuperview() }
+        
+        // Создаем представление для цвета
+        let colorView = UIView()
+        colorView.backgroundColor = colors[indexPath.item]
+        colorView.layer.cornerRadius = 8
+        colorView.layer.masksToBounds = true
+        colorView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Добавляем представление в contentView ячейки
+        cell.contentView.addSubview(colorView)
+        
+        // Констрейнты для представления цвета (размер 40x40, центрируем внутри ячейки)
+        NSLayoutConstraint.activate([
+            colorView.widthAnchor.constraint(equalToConstant: 40),
+            colorView.heightAnchor.constraint(equalToConstant: 40),
+            colorView.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
+            colorView.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+        ])
+        
+        // Добавляем обрамление только для выбранного цвета
+        if selectedColor == colors[indexPath.item] {
+            cell.layer.borderWidth = 3
+            cell.layer.borderColor = colors[indexPath.item].withAlphaComponent(0.3).cgColor
+            cell.layer.cornerRadius = 8
+        } else {
+            cell.layer.borderWidth = 0
+        }
+        
+        return cell
+    }
+    
+    // MARK: - Public Methods
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 2 // Секция 0 для эмодзи, секция 1 для цветов
     }
@@ -483,27 +559,36 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "emojiCell", for: indexPath)
-            let emojiLabel = UILabel()
-            emojiLabel.text = emojis[indexPath.item]
-            emojiLabel.font = UIFont.systemFont(ofSize: 32)
-            emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-            cell.contentView.addSubview(emojiLabel)
-            NSLayoutConstraint.activate([
-                emojiLabel.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor),
-                emojiLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
-            ])
-            return cell
+            return configureEmojiCell(for: collectionView, at: indexPath)
         } else {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "colorCell", for: indexPath)
-            cell.backgroundColor = colors[indexPath.item]
-            cell.layer.cornerRadius = 8
-            return cell
+            return configureColorCell(for: collectionView, at: indexPath)
+        }
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+            // Секция с эмодзи
+            selectedEmoji = emojis[indexPath.item]
+            collectionView.reloadSections(IndexSet(integer: 0)) // Перезагружаем секцию эмодзи
+            Logger.log("Выбран эмодзи: \(selectedEmoji ?? "")")
+        } else {
+            selectedColor = colors[indexPath.item]
+            collectionView.reloadSections(IndexSet(integer: 1)) // Перезагружаем секцию эмодзи
+            Logger.log("Выбран цвет: \(selectedColor?.description ?? "")")
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 52, height: 52)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return 5 // Вертикальный отступ между строками
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return 0 // Горизонтальный отступ между ячейками
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
