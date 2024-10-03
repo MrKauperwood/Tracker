@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 final class NewHabitViewController: UIViewController {
     
@@ -571,10 +572,12 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
             // Секция с эмодзи
             selectedEmoji = emojis[indexPath.item]
             collectionView.reloadSections(IndexSet(integer: 0)) // Перезагружаем секцию эмодзи
+            validateForm()
             Logger.log("Выбран эмодзи: \(selectedEmoji ?? "")")
         } else {
             selectedColor = colors[indexPath.item]
             collectionView.reloadSections(IndexSet(integer: 1)) // Перезагружаем секцию эмодзи
+            validateForm()
             Logger.log("Выбран цвет: \(selectedColor?.description ?? "")")
         }
     }

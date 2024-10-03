@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F010A0882CAADE0300658C89 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = F010A0862CAADE0300658C89 /* Model.xcdatamodeld */; };
+		F010A08A2CAC2D4100658C89 /* CoreDataErrorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010A0892CAC2D4100658C89 /* CoreDataErrorHelper.swift */; };
 		F0A843A42C9D7D7A0059C8A8 /* Tracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A843A32C9D7D7A0059C8A8 /* Tracker.swift */; };
 		F0A843A62C9D7D8E0059C8A8 /* TrackerCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A843A52C9D7D8E0059C8A8 /* TrackerCategory.swift */; };
 		F0A843A82C9D7D9B0059C8A8 /* TrackerRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A843A72C9D7D9B0059C8A8 /* TrackerRecord.swift */; };
@@ -53,6 +55,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F010A0872CAADE0300658C89 /* Models.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Models.xcdatamodel; sourceTree = "<group>"; };
+		F010A0892CAC2D4100658C89 /* CoreDataErrorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataErrorHelper.swift; sourceTree = "<group>"; };
 		F0A843A32C9D7D7A0059C8A8 /* Tracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tracker.swift; sourceTree = "<group>"; };
 		F0A843A52C9D7D8E0059C8A8 /* TrackerCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCategory.swift; sourceTree = "<group>"; };
 		F0A843A72C9D7D9B0059C8A8 /* TrackerRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerRecord.swift; sourceTree = "<group>"; };
@@ -110,6 +114,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F010A08B2CAD363400658C89 /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				F010A0862CAADE0300658C89 /* Model.xcdatamodeld */,
+			);
+			path = CoreData;
+			sourceTree = "<group>";
+		};
 		F0A843A12C9D7D640059C8A8 /* Structures */ = {
 			isa = PBXGroup;
 			children = (
@@ -138,6 +150,7 @@
 			children = (
 				F0A843AE2CA03CF20059C8A8 /* Logger.swift */,
 				F0A843BC2CA6B2020059C8A8 /* DayWordFormatter.swift */,
+				F010A0892CAC2D4100658C89 /* CoreDataErrorHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -165,6 +178,7 @@
 		F0C5305B2C89DF8A0071DBEA /* Tracker */ = {
 			isa = PBXGroup;
 			children = (
+				F010A08B2CAD363400658C89 /* CoreData */,
 				F0A843AC2CA03CD80059C8A8 /* Helpers */,
 				F0A843A92CA0381A0059C8A8 /* TrackerCreationScreens */,
 				F0A843A12C9D7D640059C8A8 /* Structures */,
@@ -373,6 +387,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0C530672C89DF8A0071DBEA /* Tracker.xcdatamodeld in Sources */,
+				F010A08A2CAC2D4100658C89 /* CoreDataErrorHelper.swift in Sources */,
+				F010A0882CAADE0300658C89 /* Model.xcdatamodeld in Sources */,
 				F0C5309B2C8C2F240071DBEA /* TabBarController.swift in Sources */,
 				F0C530982C8C2D280071DBEA /* StatisticViewController.swift in Sources */,
 				F0A843BD2CA6B2020059C8A8 /* DayWordFormatter.swift in Sources */,
@@ -741,6 +757,16 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
+		F010A0862CAADE0300658C89 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				F010A0872CAADE0300658C89 /* Models.xcdatamodel */,
+			);
+			currentVersion = F010A0872CAADE0300658C89 /* Models.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
 		F0C530652C89DF8A0071DBEA /* Tracker.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
