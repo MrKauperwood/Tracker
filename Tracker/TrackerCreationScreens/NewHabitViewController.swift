@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CoreData
 
 final class NewHabitViewController: UIViewController {
     
@@ -252,7 +251,7 @@ final class NewHabitViewController: UIViewController {
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
         // Констрейнты для contentStackView
@@ -363,7 +362,7 @@ final class NewHabitViewController: UIViewController {
         let headerHeight: CGFloat = 50.0 // Высота заголовка для каждой секции
         
         // Общая высота: высота эмодзи + высота цветов + высота заголовков
-        let totalHeight = emojiHeight + colorsHeight + (headerHeight * 2)
+        let totalHeight = emojiHeight + colorsHeight + (headerHeight * 2) + 30
         
         return totalHeight
     }
@@ -583,7 +582,11 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 52, height: 52)
+        let numberOfItemsPerRow: CGFloat = 6
+        let spacing: CGFloat = 10 // Отступ между ячейками
+        let totalSpacing = spacing * (numberOfItemsPerRow - 1)
+        let width = (collectionView.bounds.width - totalSpacing) / numberOfItemsPerRow
+        return CGSize(width: width, height: width)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
