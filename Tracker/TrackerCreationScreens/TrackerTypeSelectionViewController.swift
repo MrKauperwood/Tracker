@@ -10,6 +10,10 @@ import UIKit
 
 final class TrackerTypeSelectionViewController: UIViewController {
     
+    var trackerStore: TrackerStore!
+    var trackerCategoryStore: TrackerCategoryStore!
+    var trackerRecordStore: TrackerRecordStore!
+    
     // MARK: - Overrides Methods
     
     override func viewDidLoad() {
@@ -80,6 +84,9 @@ final class TrackerTypeSelectionViewController: UIViewController {
         Logger.log("Выбрано создание привычки")
         let newHabitVC = NewHabitViewController()
         newHabitVC.trackerType = .habit
+        newHabitVC.trackerStore = self.trackerStore // Передаем trackerStore
+        newHabitVC.trackerCategoryStore = self.trackerCategoryStore
+        newHabitVC.trackerRecordStore = self.trackerRecordStore
         present(newHabitVC, animated: true, completion: nil)
     }
     
@@ -87,6 +94,9 @@ final class TrackerTypeSelectionViewController: UIViewController {
         Logger.log("Выбрано создание Нерегулярного события")
         let newHabitVC = NewHabitViewController()
         newHabitVC.trackerType = .irregular // Указываем, что создается нерегулярное событие
+        newHabitVC.trackerStore = self.trackerStore // Передаем trackerStore
+        newHabitVC.trackerCategoryStore = self.trackerCategoryStore
+        newHabitVC.trackerRecordStore = self.trackerRecordStore
         present(newHabitVC, animated: true, completion: nil)
     }
 }

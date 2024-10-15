@@ -12,6 +12,9 @@ final class NewHabitViewController: UIViewController {
     // MARK: - Public Properties
     
     var trackerType: TrackerType = .habit
+    var trackerStore: TrackerStore!
+    var trackerCategoryStore: TrackerCategoryStore!
+    var trackerRecordStore: TrackerRecordStore!
     
     // MARK: - Private Properties
     
@@ -275,7 +278,6 @@ final class NewHabitViewController: UIViewController {
         
         // Констрейнты для buttonStackView (если требуется фиксированная высота)
         NSLayoutConstraint.activate([
-//            buttonStackView.topAnchor.constraint(equalTo: collectionView.bottomAnchor, constant: 16),
             buttonStackView.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
@@ -395,12 +397,27 @@ final class NewHabitViewController: UIViewController {
             trackerType: trackerType
         )
         
+        // Создаем объект категории
+        let newCategory = TrackerCategory(title: categoryTitle, trackers: [])
+        
+        // Затем добавляем трекер в CoreData
+        do {
+            try trackerStore.addTracker(newTracker, to: newCategory)
+        } catch {
+            Logger.log("Ошибка при сохранении трекера: \(error)", level: .error)
+            return
+        }
+        
         if let parentVC = ((presentingViewController?.presentingViewController as? TabBarController)?.selectedViewController as? UINavigationController)?.viewControllers.first(where: { $0 is TrackersViewController }) as? TrackersViewController {
+            
+            // Обновляем данные из базы в TrackersViewController
+            parentVC.setupTrackerStore()
+            
             // Используем навигационный стек, если нашли контроллер
             parentVC.addTracker(newTracker, to: categoryTitle)
+            
             // После добавления трекера фильтруем трекеры для выбранной даты
-            let currentWeekday = parentVC.getWeekday(from: parentVC.selectedDate)
-            parentVC.filterCategories(by: currentWeekday)
+            parentVC.filterCategories(from: parentVC.getCategories, for: parentVC.selectedDate)
             
             parentVC.reloadData() // Обновляем данные на экране
             navigationController?.popViewController(animated: true) // Возвращаемся к предыдущему экрану
@@ -592,7 +609,7 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 5 // Вертикальный отступ между строками
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
         return 0 // Горизонтальный отступ между ячейками
     }
