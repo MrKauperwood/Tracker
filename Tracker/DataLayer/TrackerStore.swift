@@ -83,7 +83,7 @@ final class TrackerStore: NSObject {
         
         // Сохраняем schedule как массив строк, который будет автоматически преобразован трансформером
         trackerEntity.schedule = tracker.schedule.map { $0.rawValue } as NSObject
-        trackerEntity.trackerType = tracker.trackerType == .habit ? "habit" : "irregular"
+        trackerEntity.trackerType = tracker.trackerType.rawValue
         
         // Проверка на существование категории
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
@@ -119,7 +119,7 @@ final class TrackerStore: NSObject {
             let scheduleRaw = entity.schedule as? [String] ?? []
             let schedule = scheduleRaw.compactMap { Weekday(rawValue: $0) }
             
-            let trackerType = entity.trackerType == "habit" ? TrackerType.habit : TrackerType.irregular
+            let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
             return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
         }
@@ -150,7 +150,7 @@ final class TrackerStore: NSObject {
             let schedule = scheduleRaw.compactMap { Weekday(rawValue: $0) }
             
             // Определяем тип трекера
-            let trackerType = entity.trackerType == "habit" ? TrackerType.habit : TrackerType.irregular
+            let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
             // Возвращаем объект Tracker
             return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
@@ -186,7 +186,7 @@ final class TrackerStore: NSObject {
         }
         
         let color = UIColorMarshalling().color(from: colorHex)
-        let trackerType = entity.trackerType == "habit" ? TrackerType.habit : TrackerType.irregular
+        let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
         
         return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
     }

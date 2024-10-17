@@ -170,9 +170,10 @@ final class TrackersViewController: UIViewController {
         
         // Фильтруем трекеры по дню недели
         filterCategories(from: categories, for: selectedDate)
+        filterTrackers(from: allExistingTrackers, for: selectedDate)
         
-        // Обновляем данные в collectionView
-        collectionView.reloadData()
+        // Обновляем коллекцию полностью
+        updateUIAfterTrackerChange()
     }
     
     private func setupUI() {

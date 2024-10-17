@@ -42,7 +42,8 @@ final class NewHabitViewController: UIViewController {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "Новая привычка"
-        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         
         return titleLabel
@@ -125,6 +126,8 @@ final class NewHabitViewController: UIViewController {
         button.layer.cornerRadius = 16 // Радиус скругления
         button.translatesAutoresizingMaskIntoConstraints = false
         
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        
         return button
     }()
     
@@ -138,6 +141,8 @@ final class NewHabitViewController: UIViewController {
         button.layer.borderWidth = 1
         button.layer.cornerRadius = 16
         button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
         return button
     }()
@@ -249,6 +254,8 @@ final class NewHabitViewController: UIViewController {
         contentStackView.addArrangedSubview(collectionView)
         contentStackView.addArrangedSubview(buttonStackView)
         
+        contentStackView.setCustomSpacing(38, after: titleLabel)
+        
         // Констрейнты для scrollView
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -259,7 +266,7 @@ final class NewHabitViewController: UIViewController {
         
         // Констрейнты для contentStackView
         NSLayoutConstraint.activate([
-            contentStackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 20),
+            contentStackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 30),
             contentStackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
             contentStackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -16),
             contentStackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
@@ -403,6 +410,7 @@ final class NewHabitViewController: UIViewController {
         // Затем добавляем трекер в CoreData
         do {
             try trackerStore.addTracker(newTracker, to: newCategory)
+            
         } catch {
             Logger.log("Ошибка при сохранении трекера: \(error)", level: .error)
             return

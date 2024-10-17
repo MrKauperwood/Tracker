@@ -92,7 +92,7 @@ final class TrackerCategoryStore: NSObject {
             // Извлечение schedule как массив строк и преобразование в массив Weekday
             let schedule: [Weekday] = (trackerEntity.schedule as? [String])?.compactMap { Weekday(rawValue: $0) } ?? []
             
-            let trackerType = trackerEntity.trackerType == "habit" ? TrackerType.habit : TrackerType.irregular
+            let trackerType = trackerEntity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
             return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
         } ?? []
@@ -108,8 +108,6 @@ final class TrackerCategoryStore: NSObject {
             context.delete(result)
             do {
                 try context.save()
-                //                // Отправляем уведомление после успешного удаления
-                //                NotificationCenter.default.post(name: .didUpdateCategories, object: nil)
             } catch {
                 Logger.log("Ошибка при сохранении категории: \(error)", level: .error)
                 throw error

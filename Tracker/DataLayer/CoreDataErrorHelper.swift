@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-class CoreDataErrorHelper {
+final class CoreDataErrorHelper {
     static func handlePersistentStoreError(error: NSError) {
         // Вызов методов для обработки конкретных типов ошибок
         handleFileSystemError(error: error)
