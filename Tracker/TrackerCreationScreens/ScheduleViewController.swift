@@ -14,7 +14,7 @@ final class ScheduleViewController: UIViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
         titleLabel.text = "Расписание"
-        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         return titleLabel
     }()
@@ -29,6 +29,8 @@ final class ScheduleViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle("Готово", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
+        
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
         // Настройка цвета текста и шрифта
         button.setTitleColor(.white, for: .normal) // Устанавливаем белый цвет текста
@@ -80,11 +82,11 @@ final class ScheduleViewController: UIViewController {
         NSLayoutConstraint.activate([
             
             // Title layout
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             // Констрейнты для таблицы
-            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 24),
+            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             
