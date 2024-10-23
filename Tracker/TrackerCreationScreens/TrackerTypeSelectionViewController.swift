@@ -10,6 +10,10 @@ import UIKit
 
 final class TrackerTypeSelectionViewController: UIViewController {
     
+    var trackerStore: TrackerStore!
+    var trackerCategoryStore: TrackerCategoryStore!
+    var trackerRecordStore: TrackerRecordStore!
+    
     // MARK: - Overrides Methods
     
     override func viewDidLoad() {
@@ -27,7 +31,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "Создание трекера"
-        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         view.addSubview(titleLabel)
         
@@ -61,17 +65,19 @@ final class TrackerTypeSelectionViewController: UIViewController {
         
         // Расстановка элементов на экране
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             habitButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             habitButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            habitButton.widthAnchor.constraint(equalToConstant: 335),
+            habitButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            habitButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             habitButton.heightAnchor.constraint(equalToConstant: 60),
             
             irregularButton.topAnchor.constraint(equalTo: habitButton.bottomAnchor, constant: 16),
             irregularButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            irregularButton.widthAnchor.constraint(equalToConstant: 335),
+            irregularButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            irregularButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             irregularButton.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
@@ -80,6 +86,9 @@ final class TrackerTypeSelectionViewController: UIViewController {
         Logger.log("Выбрано создание привычки")
         let newHabitVC = NewHabitViewController()
         newHabitVC.trackerType = .habit
+        newHabitVC.trackerStore = self.trackerStore // Передаем trackerStore
+        newHabitVC.trackerCategoryStore = self.trackerCategoryStore
+        newHabitVC.trackerRecordStore = self.trackerRecordStore
         present(newHabitVC, animated: true, completion: nil)
     }
     
@@ -87,6 +96,9 @@ final class TrackerTypeSelectionViewController: UIViewController {
         Logger.log("Выбрано создание Нерегулярного события")
         let newHabitVC = NewHabitViewController()
         newHabitVC.trackerType = .irregular // Указываем, что создается нерегулярное событие
+        newHabitVC.trackerStore = self.trackerStore // Передаем trackerStore
+        newHabitVC.trackerCategoryStore = self.trackerCategoryStore
+        newHabitVC.trackerRecordStore = self.trackerRecordStore
         present(newHabitVC, animated: true, completion: nil)
     }
 }
