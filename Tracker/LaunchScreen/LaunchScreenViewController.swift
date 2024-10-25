@@ -29,7 +29,8 @@ final class LaunchScreenViewController: UIViewController {
         
         Logger.log("Загружен Launch screen")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.switchToMainScreen()
+            let onboardingCompleted = UserDefaults.standard.bool(forKey: "onboardingCompleted")
+            onboardingCompleted ? self.switchToMainScreen() : self.switchToOnboardingScreen()
         }
     }
     
@@ -38,6 +39,15 @@ final class LaunchScreenViewController: UIViewController {
         
         if let window = UIApplication.shared.windows.first {
             window.rootViewController = tabBarController
+            UIView.transition(with: window, duration: 0.2, options: .transitionCrossDissolve, animations: nil, completion: nil)
+        }
+    }
+    
+    private func switchToOnboardingScreen() {
+        let onboardingViewController = OnboardingPageViewController()
+        
+        if let window = UIApplication.shared.windows.first {
+            window.rootViewController = onboardingViewController
             UIView.transition(with: window, duration: 0.2, options: .transitionCrossDissolve, animations: nil, completion: nil)
         }
     }

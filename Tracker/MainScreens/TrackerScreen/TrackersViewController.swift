@@ -15,7 +15,6 @@ final class TrackersViewController: UIViewController {
     private var trackerCategoryStore: TrackerCategoryStore!
     private var trackerRecordStore: TrackerRecordStore!
     
-    
     private var visibleTrackers: [Tracker] = []
     
     var selectedDate: Date = Date()
@@ -23,7 +22,6 @@ final class TrackersViewController: UIViewController {
     private var categories: [TrackerCategory] = []
     private var records: [TrackerRecord] = []
     private var completedTrackers: [TrackerRecord] = []
-    
     
     var getCategories: [TrackerCategory] {
         return categories
@@ -104,7 +102,10 @@ final class TrackersViewController: UIViewController {
         Logger.log("Фильтрация трекеров для дня недели: \(weekday)")
         
         filteredTrackers = trackers.filter { tracker in
-            tracker.schedule.contains(weekday)
+            if tracker.trackerType == .irregular {
+                return true
+            }
+            return tracker.schedule.contains(weekday)
         }
         
         Logger.log("Отфильтрованный список трекеров: \(filteredTrackers)")
@@ -332,6 +333,7 @@ extension TrackersViewController: UICollectionViewDataSource {
             self.updateEmptyStateVisibility()
         }
         Logger.log("Настройка ячейки для трекера: \(tracker.name), выполнен: \(isCompleted)", level: .debug)
+        
         return cell
         
     }

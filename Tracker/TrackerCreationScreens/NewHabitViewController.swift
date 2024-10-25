@@ -21,6 +21,7 @@ final class NewHabitViewController: UIViewController {
     private var selectedSchedule: [Weekday] = []
     private var selectedEmoji: String?
     private var selectedColor: UIColor?
+    private var selectedCategory: TrackerCategory?
     
     // MARK: - UI Elements
     
@@ -383,8 +384,10 @@ final class NewHabitViewController: UIViewController {
             return
         }
         
-        // Категория по умолчанию (вы можете реализовать выбор категории позже)
-        let categoryTitle = trackerType == .habit ? "Обучение" : "Нерегулярные события"
+        guard let categoryTitle = selectedCategory?.title else {
+            Logger.log("Категория не выбрана", level: .error)
+            return
+        }
         
         guard let selectedEmoji = selectedEmoji else {
             return
@@ -465,6 +468,42 @@ extension NewHabitViewController: UITableViewDelegate {
             
             let navController = UINavigationController(rootViewController: scheduleVC)
             present(navController, animated: true, completion: nil)
+        } else if trackerType == .habit && indexPath.row == 0 {
+            
+            guard let categoryStore = trackerCategoryStore else { return }
+            let categoryViewModel = CategorySelectionViewModel(trackerCategoryStore: categoryStore)
+            
+            // Создаем CategorySelectionViewController и передаем ViewModel
+            let categorySelectionVC = CategorySelectionViewController(viewModel: categoryViewModel)
+            
+            // Установка замыкания для обновления выбранной категории
+            categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
+                guard let self = self else { return }
+                self.selectedCategory = selectedCategory // Обновляем выбранную категорию
+                self.tableView.reloadRows(at: [indexPath], with: .none) // Перезагружаем ячейку категории
+            }
+            
+            // Презентация контроллера выбора категории
+            let navController = UINavigationController(rootViewController: categorySelectionVC)
+            present(navController, animated: true, completion: nil)
+        } else if trackerType == .irregular && indexPath.row == 0 {
+            
+            guard let categoryStore = trackerCategoryStore else { return }
+            let categoryViewModel = CategorySelectionViewModel(trackerCategoryStore: categoryStore)
+            
+            // Создаем CategorySelectionViewController и передаем ViewModel
+            let categorySelectionVC = CategorySelectionViewController(viewModel: categoryViewModel)
+            
+            // Установка замыкания для обновления выбранной категории
+            categorySelectionVC.onCategorySelected = { [weak self] selectedCategory in
+                guard let self = self else { return }
+                self.selectedCategory = selectedCategory // Обновляем выбранную категорию
+                self.tableView.reloadRows(at: [indexPath], with: .none) // Перезагружаем ячейку категории
+            }
+            
+            // Презентация контроллера выбора категории
+            let navController = UINavigationController(rootViewController: categorySelectionVC)
+            present(navController, animated: true, completion: nil)
         }
         Logger.log("Выбрана строка с индексом \(indexPath.row) в таблице")
     }
@@ -494,7 +533,8 @@ extension NewHabitViewController: UITableViewDataSource {
                 }
             }
         } else if indexPath.row == 0 {
-            cell.configureDescription("Важное")
+            let categoryDescription = selectedCategory?.title ?? ""
+            cell.configureDescription(categoryDescription)
         }
         
         cell.backgroundColor = .clear

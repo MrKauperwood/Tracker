@@ -72,6 +72,26 @@ final class TrackerCategoryStore: NSObject {
         return objects.compactMap { self.category(from: $0) }
     }
     
+    // Добавить категорию
+    func addCategory(title: String) throws {
+        let categoryEntity = TrackerCategoryCoreData(context: context)
+        categoryEntity.title = title
+        
+        do {
+            try context.save()
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("Ошибка при сохранении категории: \(error)")
+            throw error
+        }
+    }
+    
+    // Получить все категории
+    func getCategories() -> [TrackerCategory] {
+        guard let objects = fetchedResultsController.fetchedObjects else { return [] }
+        return objects.map { TrackerCategory(title: $0.title ?? "", trackers: []) }
+    }
+    
     // Преобразование Core Data объекта в модель TrackerCategory
     private func category(from entity: TrackerCategoryCoreData) -> TrackerCategory? {
         guard let title = entity.title else {
