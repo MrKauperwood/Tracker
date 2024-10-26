@@ -37,7 +37,6 @@ final class TrackerRecordStore: NSObject {
         setupFetchedResultsController()
     }
     
-    // Настройка NSFetchedResultsController
     private func setupFetchedResultsController() {
         let fetchRequest = TrackerRecordCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
@@ -58,13 +57,11 @@ final class TrackerRecordStore: NSObject {
         }
     }
     
-    // Получение всех записей из Core Data
     var records: [TrackerRecord] {
         guard let objects = fetchedResultsController.fetchedObjects else { return [] }
         return objects.compactMap { self.record(from: $0) }
     }
     
-    // Метод для добавления записи о выполнении трекера
     func addRecord(_ record: TrackerRecord) throws {
         let recordEntity = TrackerRecordCoreData(context: context)
         recordEntity.date = record.date
@@ -77,7 +74,6 @@ final class TrackerRecordStore: NSObject {
         Logger.log("Новая запись для трекера с ID: \(record.trackerId) на дату \(record.date) добавлена в CoreData")
     }
     
-    // Метод для удаления записи
     func deleteRecord(_ record: TrackerRecord) throws {
         let request = TrackerRecordCoreData.fetchRequest()
         

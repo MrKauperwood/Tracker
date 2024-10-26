@@ -1,13 +1,6 @@
-//
-//  ScheduleViewController.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 25.9.2024.
-//
-
 import UIKit
 
-final class ScheduleViewController: UIViewController {
+final class ScheduleViewController: UIViewController, ViewConfigurable {
     
     private let titleLabel: UILabel = {
         let titleLabel = UILabel()
@@ -19,11 +12,11 @@ final class ScheduleViewController: UIViewController {
         return titleLabel
     }()
     
-    private let tableView = UITableView() // Таблица для отображения дней недели
-    var selectedDays: Set<Weekday> = [] // Массив для хранения выбранных дней
+    private let tableView = UITableView()
+    var selectedDays: Set<Weekday> = []
     
     var onScheduleSelected: ((Set<Weekday>) -> Void)?
-    var tableHeightConstraint: NSLayoutConstraint? // Переменная для хранения констрейнта высоты таблицы
+    var tableHeightConstraint: NSLayoutConstraint?
     
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
@@ -32,11 +25,9 @@ final class ScheduleViewController: UIViewController {
         
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
-        // Настройка цвета текста и шрифта
-        button.setTitleColor(.white, for: .normal) // Устанавливаем белый цвет текста
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16) // Устанавливаем размер шрифта 16
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         
-        // Размеры кнопки
         button.widthAnchor.constraint(equalToConstant: 335).isActive = true
         button.heightAnchor.constraint(equalToConstant: 60).isActive = true
         
@@ -54,60 +45,15 @@ final class ScheduleViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(titleLabel)
-        view.addSubview(doneButton)
         
-        view.backgroundColor = .white
-        
-        // Настройка таблицы
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.isScrollEnabled = false
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 75
-        
-        // Настройка скругления углов таблицы
-        tableView.layer.cornerRadius = 16 // Задайте радиус углов
-        tableView.layer.maskedCorners = [
-            .layerMinXMinYCorner, // Верхний левый угол
-            .layerMaxXMinYCorner, // Верхний правый угол
-            .layerMinXMaxYCorner, // Нижний левый угол
-            .layerMaxXMaxYCorner  // Нижний правый угол
-        ]
-        tableView.clipsToBounds = true
-        
-        view.addSubview(tableView)
-        
-        NSLayoutConstraint.activate([
-            
-            // Title layout
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
-            // Констрейнты для таблицы
-            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            
-            doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            doneButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
-        ])
-        
-        // Регистрация ячейки для таблицы
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "dayCell")
-        
-        
-        // Добавляем констрейнт высоты для таблицы и сохраняем его в переменную
-        tableHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 0)
-        tableHeightConstraint?.isActive = true
-        
-        // Обновляем высоту таблицы на основе контента
-        updateTableViewHeight()
-        
+        setupUI()
         Logger.log("Экран расписания загружен")
+    }
+    
+    private func setupUI() {
+        view.backgroundColor = .white
+        addSubviews()
+        addConstraints()
     }
     
     func updateTableViewHeight() {
@@ -119,7 +65,55 @@ final class ScheduleViewController: UIViewController {
         Logger.log("Высота таблицы обновлена: \(tableView.contentSize.height)", level: .debug)
     }
     
+    func addSubviews() {
+        view.addSubview(titleLabel)
+        view.addSubview(tableView)
+        view.addSubview(doneButton)
+        setupTableView()
+    }
+    
+    func addConstraints() {
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            doneButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            doneButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            doneButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            doneButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16)
+        ])
+        
+        tableHeightConstraint = tableView.heightAnchor.constraint(equalToConstant: 0)
+        tableHeightConstraint?.isActive = true
+        updateTableViewHeight()
+    }
+    
+    private func setupTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.isScrollEnabled = false
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 75
+        
+        tableView.layer.cornerRadius = 16
+        tableView.layer.maskedCorners = [
+            .layerMinXMinYCorner,
+            .layerMaxXMinYCorner,
+            .layerMinXMaxYCorner,
+            .layerMaxXMaxYCorner
+        ]
+        tableView.clipsToBounds = true
+        
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "dayCell")
+    }
+    
     // MARK: - UISwitch Action
+    
     @objc func switchChanged(_ sender: UISwitch) {
         let day = Weekday.allCases[sender.tag]
         
@@ -141,6 +135,7 @@ final class ScheduleViewController: UIViewController {
 
 
 // MARK: - UITableViewDelegate
+
 extension ScheduleViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -162,6 +157,7 @@ extension ScheduleViewController: UITableViewDelegate {
 
 
 // MARK: - UITableViewDataSource
+
 extension ScheduleViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -177,7 +173,6 @@ extension ScheduleViewController: UITableViewDataSource {
         
         cell.backgroundColor = .lbBackground
         
-        // Создаем UISwitch
         let switchView = UISwitch(frame: .zero)
         switchView.isOn = selectedDays.contains(day)
         switchView.onTintColor = .lbBlue

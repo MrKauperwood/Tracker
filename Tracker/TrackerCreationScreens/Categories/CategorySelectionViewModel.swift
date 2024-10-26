@@ -1,13 +1,7 @@
-//
-//  Untitled.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 23.10.2024.
-//
-
 final class CategorySelectionViewModel {
     
     // MARK: - Public Properties
+    
     var categories: [TrackerCategory] = [] {
         didSet {
             categoriesDidChange?(categories)
@@ -20,20 +14,24 @@ final class CategorySelectionViewModel {
     }
     
     // MARK: - Bindings
+    
     var categoriesDidChange: (([TrackerCategory]) -> Void)?
     var selectedCategoryDidChange: ((TrackerCategory?) -> Void)?
     
     // MARK: - Dependencies
+    
     private let trackerCategoryStore: TrackerCategoryStore
     
     // MARK: - Initializer
+    
     init(trackerCategoryStore: TrackerCategoryStore) {
         self.trackerCategoryStore = trackerCategoryStore
-        loadCategories()
+        fetchCategories()
     }
     
     // MARK: - Public Methods
-    func loadCategories() {
+    
+    func fetchCategories() {
         categories = trackerCategoryStore.getCategories()
         categoriesDidChange?(categories)
     }
@@ -41,9 +39,9 @@ final class CategorySelectionViewModel {
     func addCategory(with title: String) {
         do {
             try trackerCategoryStore.addCategory(title: title)
-            loadCategories() // Обновляем категории после добавления новой
+            fetchCategories()
         } catch {
-            print("Ошибка добавления категории: \(error)")
+            Logger.log("Ошибка добавления категории: \(error)", level: .error)
         }
     }
     

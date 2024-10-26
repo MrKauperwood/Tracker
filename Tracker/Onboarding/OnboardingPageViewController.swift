@@ -1,32 +1,25 @@
-//
-//  OnboardingPageViewController.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 23.10.2024.
-//
-
 import UIKit
 
 final class OnboardingPageViewController: UIViewController {
-
+    
     private var pageViewController: UIPageViewController!
     private let pageControl = UIPageControl()
-
+    
     private var onboardingPages: [OnboardingContentViewController] = []
-
+    
     private var currentPageIndex: Int = 0 {
         didSet {
             pageControl.currentPage = currentPageIndex
         }
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupOnboardingPages()  // Создаем страницы
         setupPageViewController()
         setupPageControl()
     }
-
+    
     private func setupOnboardingPages() {
         let firstPage = OnboardingContentViewController(titleText: "Отслеживайте только то, что хотите", backgroundImageName: "LB_Onboarding1")
         let secondPage = OnboardingContentViewController(titleText: "Даже если это не литры воды и йога", backgroundImageName: "LB_Onboarding2")
@@ -42,15 +35,17 @@ final class OnboardingPageViewController: UIViewController {
         
         onboardingPages = [firstPage, secondPage]
     }
-
+    
     private func setupPageViewController() {
         pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
         pageViewController.dataSource = self
         pageViewController.delegate = self
-        pageViewController.setViewControllers([onboardingPages.first!], direction: .forward, animated: true, completion: nil)
+        if let firstPage = onboardingPages.first {
+            pageViewController.setViewControllers([firstPage], direction: .forward, animated: true, completion: nil)
+        }
         pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(pageViewController.view)
-
+        
         NSLayoutConstraint.activate([
             pageViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
             pageViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -58,31 +53,32 @@ final class OnboardingPageViewController: UIViewController {
             pageViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-
+    
     private func setupPageControl() {
         pageControl.numberOfPages = onboardingPages.count
         pageControl.currentPage = currentPageIndex
         pageControl.translatesAutoresizingMaskIntoConstraints = false
         
         pageControl.currentPageIndicatorTintColor = UIColor.lbBlack
+        pageControl.pageIndicatorTintColor = UIColor.lbGrey
         
         view.addSubview(pageControl)
-
+        
         NSLayoutConstraint.activate([
             pageControl.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -168),
             pageControl.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
-
+    
     private func goToNextPage() {
         if currentPageIndex < onboardingPages.count - 1 {
             currentPageIndex += 1
             pageViewController.setViewControllers([onboardingPages[currentPageIndex]], direction: .forward, animated: true, completion: nil)
         }
     }
-
+    
     private func completeOnboarding() {
-        UserDefaults.standard.set(true, forKey: "onboardingCompleted")
+        UserDefaults.standard.set(true, forKey: .onboardingCompleted)
         let mainTabBarController = TabBarController()
         if let window = UIApplication.shared.windows.first {
             window.rootViewController = mainTabBarController
@@ -95,29 +91,23 @@ final class OnboardingPageViewController: UIViewController {
 
 extension OnboardingPageViewController: UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        guard let index = onboardingPages.firstIndex(of: viewController as! OnboardingContentViewController) else {
-            return nil
+        if let contentVC = viewController as? OnboardingContentViewController,
+           let index = onboardingPages.firstIndex(of: contentVC) {
+            
+            // Если это первая страница, возвращаем последнюю (для цикличности)
+            return index == 0 ? onboardingPages.last : onboardingPages[index - 1]
         }
-
-        // Если это первая страница, возвращаем последнюю (для цикличности)
-        if index == 0 {
-            return onboardingPages.last
-        } else {
-            return onboardingPages[index - 1]
-        }
+        return nil
     }
-
+    
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let index = onboardingPages.firstIndex(of: viewController as! OnboardingContentViewController) else {
-            return nil
+        if let contentVC = viewController as? OnboardingContentViewController,
+           let index = onboardingPages.firstIndex(of: contentVC) {
+            
+            // Если это последняя страница, возвращаем первую (для цикличности)
+            return index == onboardingPages.count - 1 ? onboardingPages.first : onboardingPages[index + 1]
         }
-
-        // Если это последняя страница, возвращаем первую (для цикличности)
-        if index == onboardingPages.count - 1 {
-            return onboardingPages.first
-        } else {
-            return onboardingPages[index + 1]
-        }
+        return nil
     }
 }
 
@@ -125,7 +115,9 @@ extension OnboardingPageViewController: UIPageViewControllerDataSource {
 
 extension OnboardingPageViewController: UIPageViewControllerDelegate {
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        if completed, let currentVC = pageViewController.viewControllers?.first as? OnboardingContentViewController, let index = onboardingPages.firstIndex(of: currentVC) {
+        if completed,
+           let currentVC = pageViewController.viewControllers?.first as? OnboardingContentViewController,
+           let index = onboardingPages.firstIndex(of: currentVC) {
             currentPageIndex = index
         }
     }

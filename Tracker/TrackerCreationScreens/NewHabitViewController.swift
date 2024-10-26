@@ -1,10 +1,3 @@
-//
-//  NewHabitViewController.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 22.9.2024.
-//
-
 import UIKit
 
 final class NewHabitViewController: UIViewController {
@@ -25,13 +18,13 @@ final class NewHabitViewController: UIViewController {
     
     // MARK: - UI Elements
     
-    private let scrollView: UIScrollView = {
+    private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
     
-    private let contentStackView: UIStackView = {
+    private lazy var contentStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.spacing = 16
@@ -39,7 +32,7 @@ final class NewHabitViewController: UIViewController {
         return stackView
     }()
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.text = "Новая привычка"
@@ -50,7 +43,7 @@ final class NewHabitViewController: UIViewController {
         return titleLabel
     }()
     
-    private let textField: UITextField = {
+    private lazy var textField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.returnKeyType = .go
@@ -69,7 +62,7 @@ final class NewHabitViewController: UIViewController {
         return textField
     }()
     
-    private let errorLabel: UILabel = {
+    private lazy var errorLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .lbRed
@@ -79,13 +72,13 @@ final class NewHabitViewController: UIViewController {
         return label
     }()
     
-    private let clearButtonContainer: UIView = {
+    private lazy var clearButtonContainer: UIView = {
         // Учитывая ширину кнопки (17) и отступ (12), создаем контейнер с шириной 29
         let container = UIView(frame: CGRect(x: 0, y: 0, width: 29, height: 17))
         return container
     }()
     
-    private let clearButton: UIButton = {
+    private lazy var clearButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
         button.tintColor = .gray
@@ -95,7 +88,7 @@ final class NewHabitViewController: UIViewController {
         return button
     }()
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.isScrollEnabled = false
@@ -109,7 +102,7 @@ final class NewHabitViewController: UIViewController {
         return tableView
     }()
     
-    private let collectionView: UICollectionView = {
+    private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -117,7 +110,7 @@ final class NewHabitViewController: UIViewController {
         return collectionView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Отменить", for: .normal)
         
@@ -132,7 +125,7 @@ final class NewHabitViewController: UIViewController {
         return button
     }()
     
-    private let createButton: UIButton = {
+    private lazy var createButton: UIButton = {
         
         let button = UIButton(type: .system)
         button.setTitle("Создать", for: .normal)
@@ -148,11 +141,11 @@ final class NewHabitViewController: UIViewController {
         return button
     }()
     
-    private let buttonStackView: UIStackView = {
+    private lazy var buttonStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
-        stackView.distribution = .fillEqually // Равномерное распределение кнопок
-        stackView.spacing = 10 // Отступ между кнопками
+        stackView.distribution = .fillEqually
+        stackView.spacing = 10
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -173,10 +166,8 @@ final class NewHabitViewController: UIViewController {
         super.viewDidLoad()
         Logger.log("Экран создания новой привычки загружен")
         
-        // Устанавливаем заголовок в зависимости от типа трекера
         titleLabel.text = trackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
         
-        // Настройка крестика с отступом
         clearButton.translatesAutoresizingMaskIntoConstraints = false
         clearButtonContainer.addSubview(clearButton)
         
@@ -211,11 +202,9 @@ final class NewHabitViewController: UIViewController {
         
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         
-        // Регистрация ячеек
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "emojiCell")
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "colorCell")
         
-        // Регистрация table view
         tableView.register(CustomTableViewCellForNewHabit.self, forCellReuseIdentifier: "CustomCellForNewHabit")
         
         view.backgroundColor = .white
@@ -583,14 +572,12 @@ extension NewHabitViewController: UICollectionViewDelegate, UICollectionViewData
         // Удаляем все подвиды, чтобы избежать дублирования при повторном использовании ячейки
         cell.contentView.subviews.forEach { $0.removeFromSuperview() }
         
-        // Создаем представление для цвета
         let colorView = UIView()
         colorView.backgroundColor = colors[indexPath.item]
         colorView.layer.cornerRadius = 8
         colorView.layer.masksToBounds = true
         colorView.translatesAutoresizingMaskIntoConstraints = false
         
-        // Добавляем представление в contentView ячейки
         cell.contentView.addSubview(colorView)
         
         // Констрейнты для представления цвета (размер 40x40, центрируем внутри ячейки)
@@ -674,7 +661,7 @@ extension NewHabitViewController: UITextFieldDelegate {
     // Реализация делегата
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder() // Закрытие клавиатуры
-        validateForm() // Проверка формы после подтверждения изменений
+        validateForm()
         return true
     }
 }

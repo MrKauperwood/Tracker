@@ -1,10 +1,3 @@
-//
-//  UIColorMarshalling.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 3.10.2024.
-//
-
 import Foundation
 import UIKit
 
@@ -37,6 +30,6 @@ final class UIColorMarshalling {
         }
         
         // Если строка некорректна, возвращаем цвет по умолчанию (например, черный)
-        return UIColor.black
+        return UIColor.lbBlack
     }
 }

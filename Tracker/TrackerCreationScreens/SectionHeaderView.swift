@@ -1,10 +1,3 @@
-//
-//  SectionHeaderView.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 22.9.2024.
-//
-
 import UIKit
 
 final class SectionHeaderView: UICollectionReusableView {

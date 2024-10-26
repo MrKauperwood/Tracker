@@ -1,10 +1,3 @@
-//
-//  Logger.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 22.9.2024.
-//
-
 import Foundation
 
 enum LogLevel: String {

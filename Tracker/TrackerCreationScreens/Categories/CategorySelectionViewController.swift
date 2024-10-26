@@ -1,16 +1,10 @@
-//
-//  CategorySelectionViewController.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 23.10.2024.
-//
-
 import UIKit
 
-final class CategorySelectionViewController: UIViewController {
+final class CategorySelectionViewController: UIViewController, ViewConfigurable {
     
     // MARK: - UI Elements
-    private let titleLabel: UILabel = {
+    
+    private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -20,21 +14,20 @@ final class CategorySelectionViewController: UIViewController {
         return titleLabel
     }()
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         return tableView
     }()
     
-    private let addButton: UIButton = {
+    private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Добавить категорию", for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
-        // Настройка цвета текста и шрифта
-        button.setTitleColor(.white, for: .normal) // Устанавливаем белый цвет текста
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 16) // Устанавливаем размер шрифта 16
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         
         button.backgroundColor = .lbBlack
         button.layer.cornerRadius = 16
@@ -43,13 +36,13 @@ final class CategorySelectionViewController: UIViewController {
         return button
     }()
     
-    private let emptyStateLogo: UIImageView = {
+    private lazy var emptyStateLogo: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "EmptyStateLogo"))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    private let emptyStateTextLabel: UILabel = {
+    private lazy var emptyStateTextLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
@@ -60,7 +53,6 @@ final class CategorySelectionViewController: UIViewController {
         paragraphStyle.lineSpacing = 4
         paragraphStyle.alignment = .center
         
-        // Создаем атрибутированный текст
         let attributedString = NSAttributedString(
             string: "Привычки и события можно объединить по смыслу",
             attributes: [
@@ -76,6 +68,7 @@ final class CategorySelectionViewController: UIViewController {
     }()
     
     // MARK: - Properties
+    
     private let viewModel: CategorySelectionViewModel
     
     // Замыкание для передачи выбранной категории обратно
@@ -94,6 +87,7 @@ final class CategorySelectionViewController: UIViewController {
     }
     
     // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -102,37 +96,40 @@ final class CategorySelectionViewController: UIViewController {
     }
     
     // MARK: - Private Methods
+    
     private func setupUI() {
         view.backgroundColor = .white
-        
-        setUpTable()
-        
+
+        setupTableView()
+        addSubviews()
+        addConstraints()
+        toggleEmptyStateVisibility()
+    }
+    
+    func addSubviews() {
         view.addSubview(emptyStateLogo)
         view.addSubview(emptyStateTextLabel)
         view.addSubview(tableView)
         view.addSubview(addButton)
         view.addSubview(titleLabel)
-        
         Logger.log("Элементы интерфейса добавлены на экран", level: .debug)
-        
-        // Констрейнты для таблицы и кнопки
+    }
+    
+    func addConstraints() {
         NSLayoutConstraint.activate([
-            
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 30),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            
             
             tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             tableView.bottomAnchor.constraint(equalTo: addButton.topAnchor, constant: -16),
-            //
-            //
+            
             addButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             addButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
             addButton.heightAnchor.constraint(equalToConstant: 60),
-            //
+            
             emptyStateLogo.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateLogo.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
@@ -140,11 +137,7 @@ final class CategorySelectionViewController: UIViewController {
             emptyStateTextLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
             emptyStateTextLabel.centerXAnchor.constraint(equalTo: emptyStateLogo.centerXAnchor)
         ])
-        
         Logger.log("Констрейнты для элементов интерфейса установлены", level: .debug)
-        
-        // Логика скрытия пустого состояния
-        updateEmptyStateVisibility()
     }
     
     func updateTableViewHeight() {
@@ -156,7 +149,7 @@ final class CategorySelectionViewController: UIViewController {
         Logger.log("Высота таблицы обновлена: \(tableView.contentSize.height)", level: .debug)
     }
     
-    private func setUpTable() {
+    private func setupTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.isScrollEnabled = true
@@ -178,8 +171,7 @@ final class CategorySelectionViewController: UIViewController {
         Logger.log("Таблица для категорий настроена", level: .debug)
     }
     
-    // Логика отображения пустого состояния
-    private func updateEmptyStateVisibility() {
+    private func toggleEmptyStateVisibility() {
         let categories = viewModel.categories.isEmpty
         emptyStateLogo.isHidden = !categories
         emptyStateTextLabel.isHidden = !categories
@@ -191,7 +183,7 @@ final class CategorySelectionViewController: UIViewController {
         // Биндинги для ViewModel
         viewModel.categoriesDidChange = { [weak self] categories in
             
-            self?.updateEmptyStateVisibility()
+            self?.toggleEmptyStateVisibility()
             self?.tableView.reloadData()
         }
         
@@ -216,6 +208,7 @@ final class CategorySelectionViewController: UIViewController {
 }
 
 // MARK: - UITableViewDelegate, UITableViewDataSource
+
 extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

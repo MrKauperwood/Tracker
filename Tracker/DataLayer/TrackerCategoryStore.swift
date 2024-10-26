@@ -1,10 +1,3 @@
-//
-//  TrackerCategoryStore.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 3.10.2024.
-//
-
 import Foundation
 import CoreData
 
@@ -25,7 +18,6 @@ struct TrackerCategoryStoreUpdate {
 }
 
 final class TrackerCategoryStore: NSObject {
-    // Контекст Core Data
     private let context: NSManagedObjectContext
     private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
     
@@ -45,7 +37,6 @@ final class TrackerCategoryStore: NSObject {
         setupFetchedResultsController()
     }
     
-    // Настройка NSFetchedResultsController
     private func setupFetchedResultsController() {
         let fetchRequest = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.sortDescriptors = [
@@ -66,13 +57,11 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
-    // Получение всех категорий из Core Data
     var categories: [TrackerCategory] {
         guard let objects = fetchedResultsController.fetchedObjects else { return [] }
         return objects.compactMap { self.category(from: $0) }
     }
     
-    // Добавить категорию
     func addCategory(title: String) throws {
         let categoryEntity = TrackerCategoryCoreData(context: context)
         categoryEntity.title = title
@@ -86,7 +75,6 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
-    // Получить все категории
     func getCategories() -> [TrackerCategory] {
         guard let objects = fetchedResultsController.fetchedObjects else { return [] }
         return objects.map { TrackerCategory(title: $0.title ?? "", trackers: []) }
@@ -120,7 +108,6 @@ final class TrackerCategoryStore: NSObject {
         return TrackerCategory(title: title, trackers: trackers)
     }
     
-    // Метод для удаления категории
     func deleteCategory(_ category: TrackerCategory) throws {
         let request = TrackerCategoryCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "title == %@", category.title)

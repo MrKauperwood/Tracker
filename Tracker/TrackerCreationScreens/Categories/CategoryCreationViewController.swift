@@ -1,27 +1,23 @@
-//
-//  CategoryCreationViewController.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 25.10.2024.
-//
-
 import UIKit
 
-final class CategoryCreationViewController: UIViewController {
+final class CategoryCreationViewController: UIViewController, ViewConfigurable, UITextFieldDelegate {
     
     // MARK: - UI Elements
-    private let titleLabel: UILabel = CategoryCreationViewController.makeTitleLabel()
-    private let textField: UITextField = CategoryCreationViewController.makeTextField()
-    private let errorLabel: UILabel = CategoryCreationViewController.makeErrorLabel()
-    private let clearButtonContainer = UIView(frame: CGRect(x: 0, y: 0, width: 29, height: 17))
-    private let clearButton: UIButton = CategoryCreationViewController.makeClearButton()
-    private let doneButton: UIButton = CategoryCreationViewController.makeDoneButton()
+    
+    private lazy var titleLabel: UILabel = CategoryCreationViewController.makeTitleLabel()
+    private lazy var textField: UITextField = CategoryCreationViewController.makeTextField()
+    private lazy var errorLabel: UILabel = CategoryCreationViewController.makeErrorLabel()
+    private lazy var clearButtonContainer = UIView(frame: CGRect(x: 0, y: 0, width: 29, height: 17))
+    private lazy var clearButton: UIButton = CategoryCreationViewController.makeClearButton()
+    private lazy var doneButton: UIButton = CategoryCreationViewController.makeDoneButton()
     
     // MARK: - Properties
+    
     private let viewModel: CategoryCreationViewModel
     var onCategoryCreated: ((String) -> Void)?
     
     // MARK: - Initializer
+    
     init(viewModel: CategoryCreationViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -29,10 +25,13 @@ final class CategoryCreationViewController: UIViewController {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupBindings()
+        
+        textField.delegate = self
     }
     
     // MARK: - Private Methods
@@ -44,8 +43,19 @@ final class CategoryCreationViewController: UIViewController {
     }
     
     private func setupUI() {
-        configureClearButtonForTheTextField()
+        addSubviews()
+        addConstraints()
+    }
+    
+    // MARK: - ViewConfigurable Protocol Methods
+    
+    func addSubviews() {
         [titleLabel, textField, errorLabel, doneButton].forEach { view.addSubview($0) }
+        configureClearButton()
+        Logger.log("Элементы интерфейса добавлены на экран", level: .debug)
+    }
+    
+    func addConstraints() {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 30),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -63,9 +73,10 @@ final class CategoryCreationViewController: UIViewController {
             doneButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
             doneButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+        Logger.log("Констрейнты для элементов интерфейса установлены", level: .debug)
     }
     
-    private func configureClearButtonForTheTextField() {
+    private func configureClearButton() {
         clearButtonContainer.addSubview(clearButton)
         textField.rightView = clearButtonContainer
         textField.rightViewMode = .whileEditing
@@ -74,6 +85,24 @@ final class CategoryCreationViewController: UIViewController {
     private func setupBindings() {
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         doneButton.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
+        
+        // Bindings с ViewModel для обновления состояния кнопки и показа ошибок
+        viewModel.isDoneButtonEnabled = { [weak self] isEnabled in
+            self?.doneButton.isEnabled = isEnabled
+            self?.doneButton.backgroundColor = isEnabled ? UIColor(named: "LB_black") : UIColor(named: "LB_grey")
+        }
+        
+        viewModel.errorMessage = { [weak self] message in
+            self?.errorLabel.text = message
+            self?.errorLabel.isHidden = (message == nil)
+        }
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // Закрываем клавиатуру
+        textField.resignFirstResponder()
+        
+        return true
     }
     
     private func addTapGesture() {
@@ -84,35 +113,13 @@ final class CategoryCreationViewController: UIViewController {
     
     // MARK: - Validation and Actions
     
-    private func validateForm() {
-        let trimmedText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        doneButton.isEnabled = !trimmedText.isEmpty && trimmedText.count <= 38
-        doneButton.backgroundColor = doneButton.isEnabled ? UIColor(named: "LB_black") : UIColor(named: "LB_grey")
-    }
-    
     @objc private func textFieldDidChange() {
         clearButton.isHidden = textField.text?.isEmpty ?? true
-        validateForm()
-        updateErrorLabel()
-    }
-    
-    private func updateErrorLabel() {
-        let trimmedText = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        if trimmedText.count > 38 {
-            errorLabel.text = "Ограничение 38 символов"
-            errorLabel.isHidden = false
-        } else if trimmedText.isEmpty {
-            errorLabel.text = "Название категории не может быть пустым или состоять только из пробелов"
-            errorLabel.isHidden = false
-        } else {
-            errorLabel.isHidden = true
-            viewModel.updateCategoryName(trimmedText)
-        }
+        viewModel.updateCategoryName(textField.text ?? "")
     }
     
     @objc private func handleTapOutside() {
         textField.resignFirstResponder()
-        validateForm()
     }
     
     @objc private func doneButtonTapped() {
@@ -123,8 +130,8 @@ final class CategoryCreationViewController: UIViewController {
     @objc private func clearTextField() {
         textField.text = ""
         clearButton.isHidden = true
-        validateForm()
         errorLabel.isHidden = true
+        viewModel.updateCategoryName("")
     }
     
     // MARK: - Factory Methods

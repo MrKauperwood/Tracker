@@ -1,10 +1,3 @@
-//
-//  LaunchScreenViewController.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 7.9.2024.
-//
-
 import Foundation
 import UIKit
 
@@ -29,7 +22,7 @@ final class LaunchScreenViewController: UIViewController {
         
         Logger.log("Загружен Launch screen")
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let onboardingCompleted = UserDefaults.standard.bool(forKey: "onboardingCompleted")
+            let onboardingCompleted = UserDefaults.standard.bool(forKey: .onboardingCompleted)
             onboardingCompleted ? self.switchToMainScreen() : self.switchToOnboardingScreen()
         }
     }
