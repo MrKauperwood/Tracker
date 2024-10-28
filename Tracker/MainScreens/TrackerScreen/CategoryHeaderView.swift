@@ -1,10 +1,3 @@
-//
-//  CategoryHeaderView.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 23.9.2024.
-//
-
 import UIKit
 
 final class CategoryHeaderView: UICollectionReusableView {

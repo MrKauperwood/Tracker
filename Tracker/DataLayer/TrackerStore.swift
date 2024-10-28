@@ -1,10 +1,3 @@
-//
-//  TrackerStore.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 3.10.2024.
-//
-
 import Foundation
 import CoreData
 
@@ -26,7 +19,6 @@ struct TrackerStoreUpdate {
 }
 
 final class TrackerStore: NSObject {
-    // Контекст Core Data
     private let context: NSManagedObjectContext
     private var fetchedResultsController: NSFetchedResultsController<TrackerCoreData>!
     
@@ -72,7 +64,6 @@ final class TrackerStore: NSObject {
         return objects.compactMap { self.tracker(from: $0) }
     }
     
-    // Метод для добавления нового трекера
     func addTracker(_ tracker: Tracker, to category: TrackerCategory) throws {
         let trackerEntity = TrackerCoreData(context: context)
         
@@ -102,7 +93,6 @@ final class TrackerStore: NSObject {
         Logger.log("Новый трекер c именем : \"\(tracker.name)\" и категорией \"\(category.title)\" добавлен в CoreData")
     }
     
-    // Новый метод: Получение трекера по id
     func getTracker(by id: UUID) throws -> Tracker? {
         let request = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
@@ -127,13 +117,11 @@ final class TrackerStore: NSObject {
         return nil
     }
     
-    // Метод для получения всех трекеров
     func getAllTrackers() throws -> [Tracker] {
         let request = TrackerCoreData.fetchRequest()
         let results = try context.fetch(request)
         
         return results.compactMap { entity in
-            // Безопасно разворачиваем обязательные поля
             guard let id = entity.id,
                   let name = entity.name,
                   let colorHex = entity.color,
@@ -149,15 +137,12 @@ final class TrackerStore: NSObject {
             let scheduleRaw = entity.schedule as? [String] ?? []
             let schedule = scheduleRaw.compactMap { Weekday(rawValue: $0) }
             
-            // Определяем тип трекера
             let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
-            // Возвращаем объект Tracker
             return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
         }
     }
     
-    // Метод для удаления трекера
     func deleteTracker(_ tracker: Tracker) throws {
         let request = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
@@ -167,7 +152,6 @@ final class TrackerStore: NSObject {
         }
     }
     
-    // Новый метод: Удаление всех трекеров
     func deleteAllTrackers() throws {
         let request = TrackerCoreData.fetchRequest()
         let results = try context.fetch(request)
@@ -193,6 +177,7 @@ final class TrackerStore: NSObject {
 }
 
 // MARK: - NSFetchedResultsControllerDelegate
+
 extension TrackerStore: NSFetchedResultsControllerDelegate {
     
     // Этот метод вызывается перед изменениями в содержимом контроллера

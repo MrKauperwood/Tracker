@@ -1,10 +1,3 @@
-//
-//  CoreDataErrorHelper.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 1.10.2024.
-//
-
 import Foundation
 import CoreData
 

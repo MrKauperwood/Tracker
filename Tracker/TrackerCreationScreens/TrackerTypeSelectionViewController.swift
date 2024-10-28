@@ -1,20 +1,50 @@
-//
-//  TrackerTypeSelectionViewController.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 22.9.2024.
-//
-
 import Foundation
 import UIKit
 
-final class TrackerTypeSelectionViewController: UIViewController {
+final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurable {
     
     var trackerStore: TrackerStore!
     var trackerCategoryStore: TrackerCategoryStore!
     var trackerRecordStore: TrackerRecordStore!
     
-    // MARK: - Overrides Methods
+    // MARK: - UI Elements
+    
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Создание трекера"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private lazy var habitButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Привычка", for: .normal)
+        button.backgroundColor = .lbBlack
+        button.setTitleColor(.lbWhite, for: .normal)
+        button.titleLabel?.font = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.layer.cornerRadius = 16
+        button.titleLabel?.textAlignment = .center
+        button.addTarget(self, action: #selector(habitButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var irregularButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Нерегулярное событие", for: .normal)
+        button.backgroundColor = .lbBlack
+        button.setTitleColor(.lbWhite, for: .normal)
+        button.titleLabel?.font = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
+        button.layer.cornerRadius = 16
+        button.titleLabel?.textAlignment = .center
+        button.addTarget(self, action: #selector(irregularButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,43 +57,20 @@ final class TrackerTypeSelectionViewController: UIViewController {
     // MARK: - Private Methods
     
     private func setupUI() {
-        // Заголовок
-        let titleLabel = UILabel()
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Создание трекера"
-        titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        titleLabel.textAlignment = .center
+        addSubviews()
+        addConstraints()
+    }
+    
+    // MARK: - ViewConfigurable Protocol Methods
+    
+    func addSubviews() {
         view.addSubview(titleLabel)
-        
-        // Настройка шрифта для кнопок
-        let buttonFont = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
-        let buttonTextColor = UIColor.white
-        
-        // Кнопка Привычка
-        let habitButton = UIButton(type: .system)
-        habitButton.translatesAutoresizingMaskIntoConstraints = false
-        habitButton.setTitle("Привычка", for: .normal)
-        habitButton.backgroundColor = .black
-        habitButton.setTitleColor(buttonTextColor, for: .normal)
-        habitButton.titleLabel?.font = buttonFont
-        habitButton.layer.cornerRadius = 10
-        habitButton.titleLabel?.textAlignment = .center
-        habitButton.addTarget(self, action: #selector(habitButtonTapped), for: .touchUpInside)
         view.addSubview(habitButton)
-        
-        // Кнопка Нерегулярные события
-        let irregularButton = UIButton(type: .system)
-        irregularButton.translatesAutoresizingMaskIntoConstraints = false
-        irregularButton.setTitle("Нерегулярное событие", for: .normal)
-        irregularButton.backgroundColor = .black
-        irregularButton.setTitleColor(buttonTextColor, for: .normal)
-        irregularButton.titleLabel?.font = buttonFont
-        irregularButton.layer.cornerRadius = 10
-        irregularButton.titleLabel?.textAlignment = .center
-        irregularButton.addTarget(self, action: #selector(irregularButtonTapped), for: .touchUpInside)
         view.addSubview(irregularButton)
-        
-        // Расстановка элементов на экране
+        Logger.log("Элементы интерфейса добавлены на экран", level: .debug)
+    }
+    
+    func addConstraints() {
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 30),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -80,6 +87,7 @@ final class TrackerTypeSelectionViewController: UIViewController {
             irregularButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             irregularButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+        Logger.log("Констрейнты для элементов интерфейса установлены", level: .debug)
     }
     
     @objc private func habitButtonTapped() {

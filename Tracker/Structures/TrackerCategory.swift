@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TrackerCategory {
+struct TrackerCategory: Equatable {
     
     let title: String
     let trackers : [Tracker]
@@ -15,5 +15,10 @@ struct TrackerCategory {
     init(title: String, trackers: [Tracker]) {
         self.title = title
         self.trackers = trackers
+    }
+    
+    // Реализация протокола Equatable, позволяющая сравнивать две категории
+    static func == (lhs: TrackerCategory, rhs: TrackerCategory) -> Bool {
+        return lhs.title == rhs.title
     }
 }

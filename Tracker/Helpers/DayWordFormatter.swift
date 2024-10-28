@@ -1,10 +1,3 @@
-//
-//  DayWordFormatter.swift
-//  Tracker
-//
-//  Created by Aleksei Bondarenko on 27.9.2024.
-//
-
 final class DayWordFormatter {
     static func getDayWord(for count: Int) -> String {
         let lastDigit = count % 10
