@@ -71,6 +71,7 @@ final class TrackerStore: NSObject {
         trackerEntity.name = tracker.name
         trackerEntity.color = UIColorMarshalling().hexString(from: tracker.color)
         trackerEntity.emoji = tracker.emoji
+        trackerEntity.isPinned = tracker.isPinned
         
         // Сохраняем schedule как массив строк, который будет автоматически преобразован трансформером
         trackerEntity.schedule = tracker.schedule.map { $0.rawValue } as NSObject
@@ -157,6 +158,17 @@ final class TrackerStore: NSObject {
         let results = try context.fetch(request)
         results.forEach { context.delete($0) }
         try context.save()
+    }
+    
+    func updatePinStatus(for tracker: Tracker, isPinned: Bool) throws {
+        
+        let request = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        
+        if let trackerEntity = try context.fetch(request).first {
+            trackerEntity.isPinned = isPinned
+            try context.save()
+        }
     }
     
     // Преобразование Core Data объекта в модель Tracker

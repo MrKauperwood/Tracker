@@ -241,6 +241,11 @@ final class TrackersViewController: UIViewController {
     
     // Логика отображения пустого состояния
     private func updateEmptyStateVisibility() {
+        
+        setupTrackerCategoryStore()
+        setupTrackerStore()
+        setupTrackerRecordStore()
+        
         let hasFilteredTrackers = !filteredTrackers.isEmpty
         emptyStateLogo.isHidden = hasFilteredTrackers
         emptyStateTextLabel.isHidden = hasFilteredTrackers
@@ -312,9 +317,9 @@ extension TrackersViewController: UICollectionViewDataSource {
                     try self.trackerRecordStore.deleteRecord(trackerRecord)
                 }
                 
-                setupTrackerRecordStore()
-                setupTrackerRecordStore()
                 setupTrackerCategoryStore()
+                setupTrackerStore()
+                setupTrackerRecordStore()
                 self.collectionView.reloadData()
                 
                 
@@ -373,6 +378,104 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 8, left: 16, bottom: 8, right: 16)
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+extension TrackersViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        
+        let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            return self.makeContextMenu(for: tracker)
+        }
+    }
+    
+    private func makeContextMenu(for tracker: Tracker) -> UIMenu {
+
+        let pinAction = UIAction(
+            title: tracker.isPinned ? "Открепить" : "Закрепить"
+        ) { _ in
+            self.togglePin(for: tracker)
+        }
+
+        let editAction = UIAction(
+            title: "Редактировать"
+        ) { _ in
+            self.editTracker(tracker)
+        }
+        
+        let deleteAction = UIAction(
+            title: "Удалить",
+            attributes: .destructive
+        ) { _ in
+            self.deleteTracker(tracker)
+        }
+        
+        return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
+    }
+    
+    private func togglePin(for tracker: Tracker) {
+        
+        // Создаем новый экземпляр трекера с обновленным статусом
+        let updatedTracker = tracker.togglePinnedStatus()
+        
+        // Здесь будет логика для закрепления/открепления трекера
+        Logger.log("Изменение статуса закрепления для трекера: \(tracker.name)")
+        
+        do {
+            try trackerStore.updatePinStatus(for: updatedTracker, isPinned: updatedTracker.isPinned)
+            Logger.log("Трекер \(tracker.name) \(updatedTracker.isPinned ? "добавлен в избранное" : "удален из избранного")")
+            
+            // Обновляем UI, если нужно
+            updateUIAfterTrackerChange()
+        } catch {
+            Logger.log("Ошибка при обновлении статуса закрепления для трекера: \(error)", level: .error)
+        }
+    }
+    
+    private func editTracker(_ tracker: Tracker) {
+        let editVC = NewHabitViewController()
+//        editVC.trackerStore = self.trackerStore
+//        editVC.trackerCategoryStore = self.trackerCategoryStore
+//        editVC.trackerRecordStore = self.trackerRecordStore
+//        
+//        // Настраиваем контроллер с текущими данными трекера
+//        editVC.trackerType = tracker.trackerType
+//        editVC.selectedSchedule = tracker.schedule
+//        editVC.selectedEmoji = tracker.emoji
+//        editVC.selectedColor = tracker.color
+//        editVC.textField.text = tracker.name // Предварительно заполняем название трекера
+//        
+//        Logger.log("Запуск редактирования для трекера: \(tracker.name)")
+//        
+//        present(editVC, animated: true, completion: nil)
+    }
+    
+    private func deleteTracker(_ tracker: Tracker) {
+        let alertController = UIAlertController(title: "", message: "Уверены, что хотите удалить трекер?", preferredStyle: .actionSheet)
+        
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+            do {
+                // Удаляем трекер из store
+                try self.trackerStore.deleteTracker(tracker)
+                self.removeTracker(tracker)
+                self.updateUIAfterTrackerChange()
+                
+                Logger.log("Трекер \(tracker.name) успешно удален")
+            } catch {
+                Logger.log("Ошибка при удалении трекера: \(error)", level: .error)
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
 }
 

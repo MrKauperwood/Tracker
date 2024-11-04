@@ -8,14 +8,16 @@ struct Tracker {
     let emoji: String
     let schedule: [Weekday]
     let trackerType: TrackerType
+    let isPinned: Bool
     
-    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday], trackerType: TrackerType) {
+    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday], trackerType: TrackerType, isPinned: Bool = false) {
         self.id = id
         self.name = name
         self.color = color
         self.emoji = emoji
         self.schedule = schedule
         self.trackerType = trackerType
+        self.isPinned = isPinned
     }
 }
 
@@ -76,5 +78,23 @@ extension Weekday {
         default:
             return nil
         }
+    }
+}
+
+extension Tracker {
+    func togglePinnedStatus() -> Tracker {
+        return withPinnedStatus(!self.isPinned)
+    }
+    
+    func withPinnedStatus(_ pinned: Bool) -> Tracker {
+        return Tracker(
+            id: self.id,
+            name: self.name,
+            color: self.color,
+            emoji: self.emoji,
+            schedule: self.schedule,
+            trackerType: self.trackerType,
+            isPinned: pinned
+        )
     }
 }
