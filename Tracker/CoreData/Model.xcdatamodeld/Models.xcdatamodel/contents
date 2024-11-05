@@ -8,7 +8,7 @@
         <attribute name="color" attributeType="String"/>
         <attribute name="emoji" attributeType="String"/>
         <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
-        <attribute name="isPinned" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="isPinned" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="name" attributeType="String" maxValueString="38"/>
         <attribute name="schedule" attributeType="Transformable" valueTransformerName="WeekdayTransformer"/>
         <attribute name="trackerType" attributeType="String"/>

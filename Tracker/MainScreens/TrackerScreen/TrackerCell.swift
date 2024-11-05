@@ -23,6 +23,13 @@ final class TrackerCell: UICollectionViewCell {
         return label
     }()
     
+    private let pinIconView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "PinIcon"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
+        return imageView
+    }()
+    
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -80,6 +87,7 @@ final class TrackerCell: UICollectionViewCell {
         
         topContainerView.addSubview(emojiLabel)
         topContainerView.addSubview(nameLabel)
+        topContainerView.addSubview(pinIconView)
         
         bottomStackView.addArrangedSubview(daysLabel)
         bottomStackView.addArrangedSubview(increaseDayButton)
@@ -98,9 +106,11 @@ final class TrackerCell: UICollectionViewCell {
             topContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             topContainerView.heightAnchor.constraint(equalToConstant: 90),
             
-            // Emoji и Name внутри первого контейнера
             emojiLabel.topAnchor.constraint(equalTo: topContainerView.topAnchor, constant: 12),
             emojiLabel.leadingAnchor.constraint(equalTo: topContainerView.leadingAnchor, constant: 12),
+            
+            pinIconView.topAnchor.constraint(equalTo: topContainerView.topAnchor, constant: 12),
+            pinIconView.trailingAnchor.constraint(equalTo: topContainerView.trailingAnchor, constant: -12),
             
             nameLabel.bottomAnchor.constraint(equalTo: topContainerView.bottomAnchor, constant: -12),
             nameLabel.leadingAnchor.constraint(equalTo: topContainerView.leadingAnchor, constant: 12),
@@ -139,6 +149,8 @@ final class TrackerCell: UICollectionViewCell {
         
         // Обновляем UI в зависимости от состояния трекера
         updateButtonAppearance()
+        
+        pinIconView.isHidden = !tracker.isPinned
         
         daysLabel.text = daysCompletedText
         Logger.log("Конфигурация ячейки для трекера: \(tracker.name), количество дней: \(daysCompletedText), выполнен: \(isCompleted)", level: .info)

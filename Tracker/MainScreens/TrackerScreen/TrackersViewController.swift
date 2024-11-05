@@ -91,7 +91,6 @@ final class TrackersViewController: UIViewController {
     
     private func filterTrackers(from trackers: [Tracker], for date: Date) {
         guard let weekday = Weekday.from(date: date) else { return }
-        
         Logger.log("Фильтрация трекеров для дня недели: \(weekday)")
         
         filteredTrackers = trackers.filter { tracker in
@@ -108,23 +107,36 @@ final class TrackersViewController: UIViewController {
     func filterCategories(from categories: [TrackerCategory], for date: Date) {
         guard let weekday = Weekday.from(date: date) else { return }
         
-        // Создаем отфильтрованный список категорий
-        let filteredCategories = categories.compactMap { category -> TrackerCategory? in
-            // Фильтруем трекеры в категории
-            let filteredTrackers = category.trackers.filter { tracker in
-                if tracker.trackerType == .habit {
-                    return tracker.schedule.contains(weekday)
-                } else if tracker.trackerType == .irregular {
-                    return true
+        var pinnedTrackers: [Tracker] = []
+        var otherCategories: [TrackerCategory] = []
+        
+        for category in categories {
+            var filteredTrackers: [Tracker] = []
+
+            for tracker in category.trackers {
+                if tracker.isPinned {
+                    pinnedTrackers.append(tracker)
+                } else if (tracker.trackerType == .habit && tracker.schedule.contains(weekday)) || tracker.trackerType == .irregular {
+                    filteredTrackers.append(tracker)
                 }
-                return false
             }
-            
-            // Если в категории есть трекеры, возвращаем новую категорию с этими трекерами
-            return filteredTrackers.isEmpty ? nil : TrackerCategory(title: category.title, trackers: filteredTrackers)
+
+            if !filteredTrackers.isEmpty {
+                filteredTrackers.sort { $0.name < $1.name }
+                otherCategories.append(TrackerCategory(title: category.title, trackers: filteredTrackers))
+            }
         }
+        
+        // Если есть закрепленные трекеры, создаем временную категорию "Закрепленные"
+        if !pinnedTrackers.isEmpty {
+            let pinnedCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
+            filteredCategories = [pinnedCategory] + otherCategories
+        } else {
+            filteredCategories = otherCategories
+        }
+        
         Logger.log("Отфильтрованный список категорий: \(filteredCategories)")
-        self.filteredCategories = filteredCategories
+        collectionView.reloadData()
     }
     
     @objc private func handleCategoryUpdate() {
@@ -426,10 +438,10 @@ extension TrackersViewController: UICollectionViewDelegate {
         Logger.log("Изменение статуса закрепления для трекера: \(tracker.name)")
         
         do {
-            try trackerStore.updatePinStatus(for: updatedTracker, isPinned: updatedTracker.isPinned)
-            Logger.log("Трекер \(tracker.name) \(updatedTracker.isPinned ? "добавлен в избранное" : "удален из избранного")")
+            try trackerStore.updatePinStatus(for: tracker, isPinned: updatedTracker.isPinned)
+            Logger.log("Трекер \(tracker.name) \(tracker.isPinned ? "добавлен в избранное" : "удален из избранного")")
             
-            // Обновляем UI, если нужно
+            setupTrackerStore()
             updateUIAfterTrackerChange()
         } catch {
             Logger.log("Ошибка при обновлении статуса закрепления для трекера: \(error)", level: .error)

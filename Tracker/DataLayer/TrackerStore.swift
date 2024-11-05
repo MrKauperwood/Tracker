@@ -106,13 +106,15 @@ final class TrackerStore: NSObject {
             
             let color = UIColorMarshalling().color(from: colorHex)
             
+            let isPinned = entity.isPinned
+            
             // Извлекаем schedule как массив строк и преобразуем обратно в Weekday
             let scheduleRaw = entity.schedule as? [String] ?? []
             let schedule = scheduleRaw.compactMap { Weekday(rawValue: $0) }
             
             let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
-            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
+            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType, isPinned: isPinned)
         }
         
         return nil
@@ -130,6 +132,7 @@ final class TrackerStore: NSObject {
                 Logger.log("Значения для трекера - nil в базе данных", level: .error)
                 return nil
             }
+            let isPinned = entity.isPinned
             
             // Конвертируем цвет
             let color = UIColorMarshalling().color(from: colorHex)
@@ -140,7 +143,7 @@ final class TrackerStore: NSObject {
             
             let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
-            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
+            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType, isPinned: isPinned)
         }
     }
     
@@ -161,13 +164,20 @@ final class TrackerStore: NSObject {
     }
     
     func updatePinStatus(for tracker: Tracker, isPinned: Bool) throws {
-        
         let request = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
         
         if let trackerEntity = try context.fetch(request).first {
             trackerEntity.isPinned = isPinned
-            try context.save()
+            
+            do {
+                try context.save()
+            } catch {
+                Logger.log("Ошибка при сохранении context: \(error)", level: .error)
+                throw error
+            }
+        } else {
+            Logger.log("Трекер с id \(tracker.id) не найден", level: .error)
         }
     }
     
