@@ -94,6 +94,34 @@ final class TrackerStore: NSObject {
         Logger.log("Новый трекер c именем : \"\(tracker.name)\" и категорией \"\(category.title)\" добавлен в CoreData")
     }
     
+    func updateTracker(with id: UUID, newDetails: Tracker) throws {
+        // Создаем запрос на выборку трекера с заданным id
+        let request = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        // Ищем трекер в базе данных
+        if let trackerEntity = try context.fetch(request).first {
+            // Обновляем свойства трекера
+            trackerEntity.name = newDetails.name
+            trackerEntity.color = UIColorMarshalling().hexString(from: newDetails.color)
+            trackerEntity.emoji = newDetails.emoji
+            trackerEntity.isPinned = newDetails.isPinned
+            trackerEntity.schedule = newDetails.schedule.map { $0.rawValue } as NSObject
+            trackerEntity.trackerType = newDetails.trackerType.rawValue
+            
+            // Сохраняем изменения в контексте
+            do {
+                try context.save()
+                Logger.log("Трекер с именем \"\(newDetails.name)\" успешно обновлен в Core Data")
+            } catch {
+                Logger.log("Ошибка при сохранении изменений трекера: \(error)", level: .error)
+                throw error
+            }
+        } else {
+            Logger.log("Трекер с id \(id) не найден для обновления", level: .error)
+        }
+    }
+    
     func getTracker(by id: UUID) throws -> Tracker? {
         let request = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)

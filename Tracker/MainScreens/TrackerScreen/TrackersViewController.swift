@@ -112,7 +112,7 @@ final class TrackersViewController: UIViewController {
         
         for category in categories {
             var filteredTrackers: [Tracker] = []
-
+            
             for tracker in category.trackers {
                 if tracker.isPinned {
                     pinnedTrackers.append(tracker)
@@ -120,7 +120,7 @@ final class TrackersViewController: UIViewController {
                     filteredTrackers.append(tracker)
                 }
             }
-
+            
             if !filteredTrackers.isEmpty {
                 filteredTrackers.sort { $0.name < $1.name }
                 otherCategories.append(TrackerCategory(title: category.title, trackers: filteredTrackers))
@@ -214,13 +214,11 @@ final class TrackersViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         
-        // Search bar creation
         let searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.placeholder = "Поиск"
         searchBar.searchBarStyle = .minimal
         
-        // Adding all elements to the screen
         view.addSubview(titleLabel)
         view.addSubview(searchBar)
         view.addSubview(collectionView)
@@ -247,11 +245,9 @@ final class TrackersViewController: UIViewController {
             emptyStateTextLabel.centerXAnchor.constraint(equalTo: emptyStateLogo.centerXAnchor)
         ])
         
-        // Логика скрытия пустого состояния
         updateEmptyStateVisibility()
     }
     
-    // Логика отображения пустого состояния
     private func updateEmptyStateVisibility() {
         
         setupTrackerCategoryStore()
@@ -302,7 +298,6 @@ extension TrackersViewController: UICollectionViewDataSource {
                 return
             }
             
-            // Генерируем объект записи трекера
             let trackerRecord = TrackerRecord(
                 trackerId: tracker.id,
                 date: self.selectedDate)
@@ -349,13 +344,8 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     
     private func updateUIAfterTrackerChange() {
-        // Обновляем список категорий, фильтруем их
         filterCategories(from: categories, for: selectedDate)
-        
-        // Обновляем коллекцию полностью
         collectionView.reloadData()
-        
-        // Обновление отображения пустого состояния
         updateEmptyStateVisibility()
     }
     
@@ -406,13 +396,13 @@ extension TrackersViewController: UICollectionViewDelegate {
     }
     
     private func makeContextMenu(for tracker: Tracker) -> UIMenu {
-
+        
         let pinAction = UIAction(
             title: tracker.isPinned ? "Открепить" : "Закрепить"
         ) { _ in
             self.togglePin(for: tracker)
         }
-
+        
         let editAction = UIAction(
             title: "Редактировать"
         ) { _ in
@@ -450,20 +440,32 @@ extension TrackersViewController: UICollectionViewDelegate {
     
     private func editTracker(_ tracker: Tracker) {
         let editVC = NewHabitViewController()
-//        editVC.trackerStore = self.trackerStore
-//        editVC.trackerCategoryStore = self.trackerCategoryStore
-//        editVC.trackerRecordStore = self.trackerRecordStore
-//        
-//        // Настраиваем контроллер с текущими данными трекера
-//        editVC.trackerType = tracker.trackerType
-//        editVC.selectedSchedule = tracker.schedule
-//        editVC.selectedEmoji = tracker.emoji
-//        editVC.selectedColor = tracker.color
-//        editVC.textField.text = tracker.name // Предварительно заполняем название трекера
-//        
-//        Logger.log("Запуск редактирования для трекера: \(tracker.name)")
-//        
-//        present(editVC, animated: true, completion: nil)
+        editVC.trackerStore = self.trackerStore
+        editVC.trackerCategoryStore = self.trackerCategoryStore
+        editVC.trackerRecordStore = self.trackerRecordStore
+        
+        editVC.trackerType = tracker.trackerType
+        editVC.selectedSchedule = tracker.schedule
+        editVC.selectedEmoji = tracker.emoji
+        editVC.selectedColor = tracker.color
+        
+        guard let category = trackerCategoryStore.categories.first(where: { category in
+            category.trackers.contains(where: { $0.id == tracker.id })
+        }) else {
+            Logger.log("Категория для данного трекера не найдена", level: .error)
+            return
+        }
+        
+        let completedDaysCount = trackerRecordStore.records.filter { $0.trackerId == tracker.id }.count
+        let daysCompletedText = "\(completedDaysCount) \(DayWordFormatter.getDayWord(for: completedDaysCount))"
+        
+        editVC.counterLabel.text = daysCompletedText
+        editVC.selectedCategory = category
+        editVC.textField.text = tracker.name
+        editVC.existingTrackerId = tracker.id
+        editVC.isEditingMode = true
+        
+        present(editVC, animated: true, completion: nil)
     }
     
     private func deleteTracker(_ tracker: Tracker) {
@@ -594,7 +596,6 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
             }
         }
         
-        // Обновление отображения пустого состояния
         updateEmptyStateVisibility()
     }
 }

@@ -192,11 +192,11 @@
 		F0A843A92CA0381A0059C8A8 /* TrackerCreationScreens */ = {
 			isa = PBXGroup;
 			children = (
+				F0D436ED2CDE31DE001AA9CF /* Schedule */,
+				F0D436EC2CDE318E001AA9CF /* TypeSelection */,
 				F06446BD2CC919240093145F /* Categories */,
-				F0A843AA2CA0383F0059C8A8 /* TrackerTypeSelectionViewController.swift */,
 				F0A843B02CA04A670059C8A8 /* NewHabitViewController.swift */,
 				F0A843B22CA05B410059C8A8 /* SectionHeaderView.swift */,
-				F0A843B82CA367A30059C8A8 /* ScheduleViewController.swift */,
 				F0A843BA2CA4B3070059C8A8 /* CustomTableViewCellForNewHabit.swift */,
 			);
 			path = TrackerCreationScreens;
@@ -314,6 +314,22 @@
 				F0C5309A2C8C2F240071DBEA /* TabBarController.swift */,
 			);
 			path = TabBar;
+			sourceTree = "<group>";
+		};
+		F0D436EC2CDE318E001AA9CF /* TypeSelection */ = {
+			isa = PBXGroup;
+			children = (
+				F0A843AA2CA0383F0059C8A8 /* TrackerTypeSelectionViewController.swift */,
+			);
+			path = TypeSelection;
+			sourceTree = "<group>";
+		};
+		F0D436ED2CDE31DE001AA9CF /* Schedule */ = {
+			isa = PBXGroup;
+			children = (
+				F0A843B82CA367A30059C8A8 /* ScheduleViewController.swift */,
+			);
+			path = Schedule;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
