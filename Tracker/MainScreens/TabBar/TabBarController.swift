@@ -9,7 +9,7 @@ final class TabBarController: UITabBarController {
         let trackerVC = UINavigationController(rootViewController: TrackersViewController())
         trackerVC.tabBarItem = UITabBarItem(title: "Трекеры", image: UIImage(named: "TrackersLogo"), tag: 0)
         
-        let statisticVC = UINavigationController()
+        let statisticVC = UINavigationController(rootViewController: StatisticViewController())
         statisticVC.tabBarItem = UITabBarItem(title: "Статистика", image: UIImage(named: "StatisticLogo"), tag: 1)
         
         viewControllers = [trackerVC, statisticVC]
