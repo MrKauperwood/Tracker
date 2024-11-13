@@ -25,6 +25,8 @@ final class TrackersViewController: UIViewController {
     private var filteredCategories: [TrackerCategory] = []
     private var filteredTrackers: [Tracker] = []
     
+    private var currentSearchText: String = ""
+    
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -45,6 +47,23 @@ final class TrackersViewController: UIViewController {
         label.text = "Что будем отслеживать?"
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
         label.textColor = .lbBlack
+        return label
+    }()
+    
+    private let emptyStateForSearchLogo: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "EmptyStateForSearch"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
+        return imageView
+    }()
+    
+    private let emptyStateForSearchTextLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Ничего не найдено"
+        label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .lbBlack
+        label.isHidden = true
         return label
     }()
     
@@ -109,13 +128,16 @@ final class TrackersViewController: UIViewController {
         
         var pinnedTrackers: [Tracker] = []
         var otherCategories: [TrackerCategory] = []
-        
+
         for category in categories {
             var filteredTrackers: [Tracker] = []
             
             for tracker in category.trackers {
                 if tracker.isPinned {
-                    pinnedTrackers.append(tracker)
+                    // Проверяем, подходит ли закрепленный трекер по расписанию
+                    if tracker.trackerType == .irregular || tracker.schedule.contains(weekday) {
+                        pinnedTrackers.append(tracker)
+                    }
                 } else if (tracker.trackerType == .habit && tracker.schedule.contains(weekday)) || tracker.trackerType == .irregular {
                     filteredTrackers.append(tracker)
                 }
@@ -126,15 +148,14 @@ final class TrackersViewController: UIViewController {
                 otherCategories.append(TrackerCategory(title: category.title, trackers: filteredTrackers))
             }
         }
-        
-        // Если есть закрепленные трекеры, создаем временную категорию "Закрепленные"
+
         if !pinnedTrackers.isEmpty {
             let pinnedCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
             filteredCategories = [pinnedCategory] + otherCategories
         } else {
             filteredCategories = otherCategories
         }
-        
+
         Logger.log("Отфильтрованный список категорий: \(filteredCategories)")
         collectionView.reloadData()
     }
@@ -174,11 +195,8 @@ final class TrackersViewController: UIViewController {
         let formattedDate = dateFormatter.string(from: selectedDate)
         Logger.log("Выбранная дата: \(formattedDate)")
         
-        // Фильтруем трекеры по дню недели
-        filterCategories(from: categories, for: selectedDate)
-        filterTrackers(from: allExistingTrackers, for: selectedDate)
+         filterTrackers(from: allExistingTrackers, for: selectedDate)
         
-        // Обновляем коллекцию полностью
         updateUIAfterTrackerChange()
     }
     
@@ -218,12 +236,15 @@ final class TrackersViewController: UIViewController {
         searchBar.translatesAutoresizingMaskIntoConstraints = false
         searchBar.placeholder = "Поиск"
         searchBar.searchBarStyle = .minimal
+        searchBar.delegate = self
         
         view.addSubview(titleLabel)
         view.addSubview(searchBar)
         view.addSubview(collectionView)
         view.addSubview(emptyStateLogo)
         view.addSubview(emptyStateTextLabel)
+        view.addSubview(emptyStateForSearchLogo)
+        view.addSubview(emptyStateForSearchTextLabel)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -242,7 +263,13 @@ final class TrackersViewController: UIViewController {
             emptyStateLogo.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             emptyStateTextLabel.topAnchor.constraint(equalTo: emptyStateLogo.bottomAnchor, constant: 8),
-            emptyStateTextLabel.centerXAnchor.constraint(equalTo: emptyStateLogo.centerXAnchor)
+            emptyStateTextLabel.centerXAnchor.constraint(equalTo: emptyStateLogo.centerXAnchor),
+            
+            emptyStateForSearchLogo.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            emptyStateForSearchLogo.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            emptyStateForSearchTextLabel.topAnchor.constraint(equalTo: emptyStateLogo.bottomAnchor, constant: 8),
+            emptyStateForSearchTextLabel.centerXAnchor.constraint(equalTo: emptyStateLogo.centerXAnchor)
         ])
         
         updateEmptyStateVisibility()
@@ -344,7 +371,8 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     
     private func updateUIAfterTrackerChange() {
-        filterCategories(from: categories, for: selectedDate)
+        //        filterCategories(from: categories, for: selectedDate)
+        filterTrackersAndCategories(for: currentSearchText)
         collectionView.reloadData()
         updateEmptyStateVisibility()
     }
@@ -643,6 +671,66 @@ extension TrackersViewController {
         // Загрузка начальных данных
         records = trackerRecordStore.records
         Logger.log("Все записи трекеров (в количестве \(records.count)) были загружены из CoreData: \(records)")
+        
+        collectionView.reloadData()
+    }
+}
+
+extension TrackersViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        currentSearchText = searchText
+        filterTrackersAndCategories(for: searchText)
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.text = ""
+        currentSearchText = ""
+        filterTrackersAndCategories(for: "")
+        searchBar.resignFirstResponder()
+    }
+    
+    private func filterTrackersAndCategories(for searchText: String) {
+        // Сначала фильтруем трекеры по дню недели
+        filterTrackers(from: allExistingTrackers, for: selectedDate)
+        
+        if searchText.isEmpty {
+            // Если строка поиска пуста, используем все категории
+            filteredCategories = categories
+            let isHidden = !filteredTrackers.isEmpty
+            emptyStateForSearchLogo.isHidden = isHidden
+            emptyStateForSearchTextLabel.isHidden = isHidden
+        } else {
+            // Фильтруем трекеры по введенному тексту
+            filteredTrackers = filteredTrackers.filter { tracker in
+                tracker.name.lowercased().contains(searchText.lowercased())
+            }
+            
+            let isHidden = !filteredTrackers.isEmpty
+            emptyStateForSearchLogo.isHidden = isHidden
+            emptyStateForSearchTextLabel.isHidden = isHidden
+            
+            // Проверяем, есть ли среди отфильтрованных трекеров закрепленные
+            let pinnedTrackers = filteredTrackers.filter { $0.isPinned }
+            let nonPinnedTrackers = filteredTrackers.filter { !$0.isPinned }
+            
+            // Создаем временную категорию "Закрепленные" и добавляем её в начало списка, если есть закрепленные трекеры
+            filteredCategories = []
+            if !pinnedTrackers.isEmpty {
+                let pinnedCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
+                filteredCategories.append(pinnedCategory)
+            }
+            
+            // Фильтруем категории, исключая закрепленные трекеры
+            let remainingCategories = categories.compactMap { category in
+                let trackersInCategory = category.trackers.filter { tracker in
+                    nonPinnedTrackers.contains(where: { $0.id == tracker.id })
+                }
+                return trackersInCategory.isEmpty ? nil : TrackerCategory(title: category.title, trackers: trackersInCategory)
+            }
+            
+            // Добавляем оставшиеся категории в список
+            filteredCategories.append(contentsOf: remainingCategories)
+        }
         
         collectionView.reloadData()
     }
