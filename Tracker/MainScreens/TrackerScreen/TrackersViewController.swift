@@ -25,6 +25,8 @@ final class TrackersViewController: UIViewController {
     private var filteredCategories: [TrackerCategory] = []
     private var filteredTrackers: [Tracker] = []
     
+    private var currentFilter: TrackerFilter = .allTrackers
+    
     private var currentSearchText: String = ""
     
     private let collectionView: UICollectionView = {
@@ -32,6 +34,7 @@ final class TrackersViewController: UIViewController {
         layout.scrollDirection = .vertical
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.alwaysBounceVertical = true
         return collectionView
     }()
     
@@ -67,6 +70,18 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
+    private let filtersButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Фильтры", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
+        button.setTitleColor(.lbWhite, for: .normal)
+        button.backgroundColor = .lbBlue
+        button.layer.cornerRadius = 16
+        button.addTarget(self, action: #selector(filtersButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ru_RU") // Устанавливаем русский язык
@@ -95,7 +110,6 @@ final class TrackersViewController: UIViewController {
         setupTrackerCategoryStore()
         setupTrackerStore()
         setupTrackerRecordStore()
-        
         
         // Фильтрация трекеров по текущему дню недели
         let currentDate = Date()
@@ -187,6 +201,78 @@ final class TrackersViewController: UIViewController {
         present(trackerTypeVC, animated: true, completion: nil)
     }
     
+    @objc private func filtersButtonTapped() {
+        let filterVC = FilterOptionsViewController()
+        filterVC.selectedFilter = currentFilter
+        filterVC.filterSelected = { [weak self] selectedFilter in
+            self?.applyFilter(selectedFilter)
+        }
+        present(filterVC, animated: true, completion: nil)
+    }
+    
+    private func applyFilter(_ filter: TrackerFilter) {
+        currentFilter = filter
+        filtersButton.setTitleColor(filter == .allTrackers ? .lbWhite : .lbRed, for: .normal)
+        
+        switch filter {
+        case .allTrackers:
+            filterTrackers(from: allExistingTrackers, for: selectedDate)
+            filterCategories(from: categories, for: selectedDate)
+        case .today:
+            let currentDate = Date()
+            selectedDate = currentDate
+
+            if let datePicker = navigationItem.rightBarButtonItem?.customView as? UIDatePicker {
+                datePicker.setDate(currentDate, animated: true)
+            }
+            filterTrackers(from: allExistingTrackers, for: currentDate)
+            filterCategories(from: categories, for: currentDate)
+        case .completed:
+            // Фильтруем только завершённые трекеры для выбранной даты
+            let completedTrackersOnly = filteredTrackers.filter { tracker in
+                records.contains { record in
+                    record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: selectedDate)
+                }
+            }
+            
+            // Обновляем filteredTrackers
+            filteredTrackers = completedTrackersOnly
+            
+            // Обновляем filteredCategories, чтобы включить только завершённые трекеры
+            filteredCategories = categories.compactMap { category in
+                let trackersInCategory = category.trackers.filter { tracker in
+                    completedTrackersOnly.contains { $0.id == tracker.id }
+                }
+                return trackersInCategory.isEmpty ? nil : TrackerCategory(title: category.title, trackers: trackersInCategory)
+            }
+        
+        case .uncompleted:
+            // Фильтруем только невыполненные трекеры для выбранной даты
+            let uncompletedTrackersOnly = filteredTrackers.filter { tracker in
+                !records.contains { record in
+                    record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: selectedDate)
+                }
+            }
+            
+            // Обновляем filteredTrackers
+            filteredTrackers = uncompletedTrackersOnly
+            
+            // Обновляем filteredCategories, чтобы включить только невыполненные трекеры
+            filteredCategories = categories.compactMap { category in
+                let trackersInCategory = category.trackers.filter { tracker in
+                    uncompletedTrackersOnly.contains { $0.id == tracker.id }
+                }
+                return trackersInCategory.isEmpty ? nil : TrackerCategory(title: category.title, trackers: trackersInCategory)
+            }
+        }
+        
+        let isHidden = !filteredTrackers.isEmpty
+        emptyStateForSearchLogo.isHidden = isHidden
+        emptyStateForSearchTextLabel.isHidden = isHidden
+        
+        collectionView.reloadData()
+    }
+    
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date
         let weekday = getWeekday(from: selectedDate)
@@ -195,9 +281,10 @@ final class TrackersViewController: UIViewController {
         let formattedDate = dateFormatter.string(from: selectedDate)
         Logger.log("Выбранная дата: \(formattedDate)")
         
-         filterTrackers(from: allExistingTrackers, for: selectedDate)
+        filterTrackers(from: allExistingTrackers, for: selectedDate)
         
         updateUIAfterTrackerChange()
+        applyFilter(currentFilter)
     }
     
     private func setupUI() {
@@ -245,6 +332,7 @@ final class TrackersViewController: UIViewController {
         view.addSubview(emptyStateTextLabel)
         view.addSubview(emptyStateForSearchLogo)
         view.addSubview(emptyStateForSearchTextLabel)
+        view.addSubview(filtersButton)
         
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -269,7 +357,13 @@ final class TrackersViewController: UIViewController {
             emptyStateForSearchLogo.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
             emptyStateForSearchTextLabel.topAnchor.constraint(equalTo: emptyStateLogo.bottomAnchor, constant: 8),
-            emptyStateForSearchTextLabel.centerXAnchor.constraint(equalTo: emptyStateLogo.centerXAnchor)
+            emptyStateForSearchTextLabel.centerXAnchor.constraint(equalTo: emptyStateLogo.centerXAnchor),
+            
+            filtersButton.widthAnchor.constraint(equalToConstant: 114),
+            filtersButton.heightAnchor.constraint(equalToConstant: 50),
+            filtersButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filtersButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
+
         ])
         
         updateEmptyStateVisibility()
@@ -282,9 +376,26 @@ final class TrackersViewController: UIViewController {
         setupTrackerRecordStore()
         
         let hasFilteredTrackers = !filteredTrackers.isEmpty
-        emptyStateLogo.isHidden = hasFilteredTrackers
-        emptyStateTextLabel.isHidden = hasFilteredTrackers
+        let isSearchActive = !currentSearchText.isEmpty
+
+        if isSearchActive {
+            // Когда активен поиск, показываем элементы пустого состояния для поиска
+            emptyStateLogo.isHidden = true
+            emptyStateTextLabel.isHidden = true
+            emptyStateForSearchLogo.isHidden = hasFilteredTrackers
+            emptyStateForSearchTextLabel.isHidden = hasFilteredTrackers
+        } else {
+            // Когда поиск не активен, показываем элементы пустого состояния для списка трекеров
+            emptyStateLogo.isHidden = hasFilteredTrackers
+            emptyStateTextLabel.isHidden = hasFilteredTrackers
+            emptyStateForSearchLogo.isHidden = true
+            emptyStateForSearchTextLabel.isHidden = true
+        }
+        
+        // Скрываем collectionView, если нет трекеров
         collectionView.isHidden = !hasFilteredTrackers
+        filtersButton.isHidden = !hasFilteredTrackers
+        
     }
 }
 
@@ -696,18 +807,12 @@ extension TrackersViewController: UISearchBarDelegate {
         if searchText.isEmpty {
             // Если строка поиска пуста, используем все категории
             filteredCategories = categories
-            let isHidden = !filteredTrackers.isEmpty
-            emptyStateForSearchLogo.isHidden = isHidden
-            emptyStateForSearchTextLabel.isHidden = isHidden
+            filteredTrackers = categories.flatMap { $0.trackers }
         } else {
             // Фильтруем трекеры по введенному тексту
             filteredTrackers = filteredTrackers.filter { tracker in
                 tracker.name.lowercased().contains(searchText.lowercased())
             }
-            
-            let isHidden = !filteredTrackers.isEmpty
-            emptyStateForSearchLogo.isHidden = isHidden
-            emptyStateForSearchTextLabel.isHidden = isHidden
             
             // Проверяем, есть ли среди отфильтрованных трекеров закрепленные
             let pinnedTrackers = filteredTrackers.filter { $0.isPinned }
@@ -732,6 +837,7 @@ extension TrackersViewController: UISearchBarDelegate {
             filteredCategories.append(contentsOf: remainingCategories)
         }
         
+        updateEmptyStateVisibility()
         collectionView.reloadData()
     }
 }
