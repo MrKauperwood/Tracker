@@ -2,6 +2,17 @@ import UIKit
 
 final class CategoryCreationViewController: UIViewController, ViewConfigurable, UITextFieldDelegate {
     
+    // MARK: - Public Method
+
+    func setTitleAndCategory(_ title: String, andCategoryName categoryName: String) {
+        titleLabel.text = title
+        textField.text = categoryName
+    }
+    
+    var getCategoryName: String {
+        return textField.text ?? ""
+    }
+    
     // MARK: - UI Elements
     
     private lazy var titleLabel: UILabel = CategoryCreationViewController.makeTitleLabel()
@@ -15,6 +26,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     private let viewModel: CategoryCreationViewModel
     var onCategoryCreated: ((String) -> Void)?
+    var onViewDidAppear: (() -> Void)?
     
     // MARK: - Initializer
     
@@ -28,6 +40,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        onViewDidAppear?()
         setupView()
         setupBindings()
         
@@ -74,6 +87,14 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
             doneButton.heightAnchor.constraint(equalToConstant: 60)
         ])
         Logger.log("Констрейнты для элементов интерфейса установлены", level: .debug)
+    }
+    
+    func focusTextField() {
+        textField.becomeFirstResponder()
+        if let text = textField.text {
+            let endPosition = textField.endOfDocument
+            textField.selectedTextRange = textField.textRange(from: endPosition, to: endPosition)
+        }
     }
     
     private func configureClearButton() {

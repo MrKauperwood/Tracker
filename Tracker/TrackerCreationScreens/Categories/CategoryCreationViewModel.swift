@@ -4,7 +4,6 @@ final class CategoryCreationViewModel {
     
     // MARK: - Properties
     
-    // Замыкания для передачи состояния кнопки и сообщений об ошибках
     var isDoneButtonEnabled: ((Bool) -> Void)?
     var errorMessage: ((String?) -> Void)?
     

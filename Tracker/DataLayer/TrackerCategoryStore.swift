@@ -75,6 +75,22 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
+    func editCategory(_ category: TrackerCategory, with newTitle: String) throws {
+        let request = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", category.title)
+        
+        do {
+            if let result = try context.fetch(request).first {
+                result.title = newTitle
+                try context.save()
+                try fetchedResultsController.performFetch()
+            }
+        } catch {
+            print("Ошибка при редактировании категории: \(error)")
+            throw error
+        }
+    }
+    
     func getCategories() -> [TrackerCategory] {
         guard let objects = fetchedResultsController.fetchedObjects else { return [] }
         return objects.map { TrackerCategory(title: $0.title ?? "", trackers: []) }
@@ -115,6 +131,7 @@ final class TrackerCategoryStore: NSObject {
             context.delete(result)
             do {
                 try context.save()
+                try fetchedResultsController.performFetch()
             } catch {
                 Logger.log("Ошибка при сохранении категории: \(error)", level: .error)
                 throw error

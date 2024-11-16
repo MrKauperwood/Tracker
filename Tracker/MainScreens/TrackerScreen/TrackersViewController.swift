@@ -38,7 +38,7 @@ final class TrackersViewController: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.alwaysBounceVertical = true
-        collectionView.backgroundColor = .lbBlack
+        collectionView.backgroundColor = .lbWhite
         return collectionView
     }()
     

@@ -180,7 +180,6 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
     }
     
     private func setupBindings() {
-        // Биндинги для ViewModel
         viewModel.categoriesDidChange = { [weak self] categories in
             
             self?.toggleEmptyStateVisibility()
@@ -252,5 +251,73 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
         
         // Возвращаемся на экран создания привычки
         dismiss(animated: true, completion: nil)
+    }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let category = viewModel.categories[indexPath.row]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            return self.makeContextMenu(for: category)
+        }
+    }
+    
+    private func makeContextMenu(for category: TrackerCategory) -> UIMenu {
+        
+        let editAction = UIAction(
+            title: "Редактировать"
+        ) { _ in
+            self.editCategory(category)
+        }
+        
+        let deleteAction = UIAction(
+            title: "Удалить",
+            attributes: .destructive
+        ) { _ in
+            self.removeCategory(category)
+        }
+        
+        return UIMenu(title: "", children: [editAction, deleteAction])
+    }
+    
+    private func editCategory(_ category: TrackerCategory) {
+        let editViewModel = CategoryCreationViewModel()
+        let editVC = CategoryCreationViewController(viewModel: editViewModel)
+        
+        editVC.setTitleAndCategory("Редактирование категории", andCategoryName: category.title)
+        
+        editVC.onViewDidAppear = { [weak editVC] in
+            editVC?.focusTextField()
+        }
+        
+        // Замыкание, которое вызывается после создания категории
+        editVC.onCategoryCreated = { [weak self] categoryName in
+            self?.viewModel.editCategory(category, newTitle: editVC.getCategoryName)
+        }
+        
+        present(editVC, animated: true, completion: nil)
+    }
+    
+    private func removeCategory(_ category: TrackerCategory) {
+        let alertController = UIAlertController(title: "", message: "Эта категория точно не нужна?", preferredStyle: .actionSheet)
+        
+        let editViewModel = CategoryCreationViewModel()
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+            do {
+                self.viewModel.removeCategory(category)
+                self.viewModel.fetchCategories()
+                self.tableView.reloadData()
+                self.toggleEmptyStateVisibility()
+            } catch {
+                Logger.log("Ошибка при удалении трекера: \(error)", level: .error)
+            }
+            
+        }
+        
+        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
 }
