@@ -46,7 +46,7 @@ final class FilterOptionsViewController: UIViewController, ViewConfigurable {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         
         addSubviews()
         addConstraints()

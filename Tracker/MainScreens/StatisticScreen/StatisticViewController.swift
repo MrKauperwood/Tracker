@@ -52,7 +52,7 @@ final class StatisticViewController: UIViewController, ViewConfigurable {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Анализировать пока нечего"
         label.font = UIFont.systemFont(ofSize: Constants.labelFontSize, weight: .regular)
-        label.textColor = .lbBlack
+        label.textColor = .lbBlackAndWhite
         return label
     }()
     
@@ -78,6 +78,8 @@ final class StatisticViewController: UIViewController, ViewConfigurable {
         
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.backgroundColor = .lbWhite
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: 0)
         
         if tableView.isHidden == false {
             calculateStatistics()
@@ -210,6 +212,9 @@ extension StatisticViewController: UITableViewDataSource {
         
         let stat = statistics[indexPath.row]
         cell.configure(with: stat.number, description: stat.description)
+        
+        // Отключаем выделение ячейки
+        cell.selectionStyle = .none
         return cell
     }
 }
@@ -225,9 +230,14 @@ extension StatisticViewController: UITableViewDelegate {
         return Constants.footerHeight
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        let inset = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: 0)
+        cell.contentView.layoutMargins = inset
+    }
+    
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         let spacerView = UIView()
-        spacerView.backgroundColor = .clear
+        spacerView.backgroundColor = .clear // Пустой прозрачный вид
         return spacerView
     }
 }

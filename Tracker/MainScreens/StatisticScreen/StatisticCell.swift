@@ -16,7 +16,7 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
         static let descriptionLabelFontSize: CGFloat = 12
         
         static let borderRadius: CGFloat = 16
-        static let borderWidth: CGFloat = 1
+        static let borderWidth: CGFloat = 4 // Увеличьте ширину границы для наглядности
     }
     
     // MARK: - UI Elements
@@ -24,7 +24,7 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: Constants.numberLabelFontSize, weight: .bold)
-        label.textColor = .lbBlack
+        label.textColor = .lbBlackAndWhite
         return label
     }()
     
@@ -32,7 +32,7 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: Constants.descriptionLabelFontSize, weight: .regular)
-        label.textColor = .lbBlack
+        label.textColor = .lbBlackAndWhite
         return label
     }()
     
@@ -40,11 +40,9 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = Constants.borderRadius
-        view.backgroundColor = .lbWhite
-        view.layer.borderWidth = Constants.borderWidth
+        view.layer.masksToBounds = true // Добавляем маскирование
         return view
     }()
-    
     
     // MARK: - Initializer
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -54,7 +52,7 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        setupGradientLayer()
+        setupGradientBorder()
     }
     
     required init?(coder: NSCoder) {
@@ -63,6 +61,7 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
     
     // MARK: - Setup
     private func setupUI() {
+        contentView.backgroundColor = .lbWhite
         addSubviews()
         addConstraints()
     }
@@ -88,7 +87,8 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
         ])
     }
     
-    private func setupGradientLayer() {
+    private func setupGradientBorder() {
+        gradientLayer.frame = borderView.bounds
         gradientLayer.colors = [
             UIColor.lbCS1Red.cgColor,
             UIColor.lbCS9MintGreen.cgColor,
@@ -96,10 +96,17 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
         ]
         gradientLayer.startPoint = CGPoint(x: 0, y: 0)
         gradientLayer.endPoint = CGPoint(x: 1, y: 0)
-        gradientLayer.cornerRadius = Constants.borderRadius
-        borderView.layer.insertSublayer(gradientLayer, at: 0)
+        
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.lineWidth = Constants.borderWidth
+        shapeLayer.path = UIBezierPath(roundedRect: borderView.bounds, cornerRadius: Constants.borderRadius).cgPath
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.strokeColor = UIColor.black.cgColor
+        
+        gradientLayer.mask = shapeLayer
+        
+        borderView.layer.addSublayer(gradientLayer)
     }
-    
     
     // MARK: - Configuration
     func configure(with number: Int, description: String) {

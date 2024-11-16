@@ -29,18 +29,23 @@ final class TrackersViewController: UIViewController {
     
     private var currentSearchText: String = ""
     
+    // Добавляем констрейнт для ширины строки поиска
+    private var searchBarWidthConstraint: NSLayoutConstraint!
+    
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.alwaysBounceVertical = true
+        collectionView.backgroundColor = .lbBlack
         return collectionView
     }()
     
     private let emptyStateLogo: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "EmptyStateLogo"))
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
         return imageView
     }()
     
@@ -49,7 +54,8 @@ final class TrackersViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Что будем отслеживать?"
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        label.textColor = .lbBlack
+        label.textColor = .lbBlackAndWhite
+        label.isHidden = true
         return label
     }()
     
@@ -65,7 +71,7 @@ final class TrackersViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Ничего не найдено"
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        label.textColor = .lbBlack
+        label.textColor = .lbBlackAndWhite
         label.isHidden = true
         return label
     }()
@@ -75,18 +81,12 @@ final class TrackersViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Фильтры", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
-        button.setTitleColor(.lbWhite, for: .normal)
+        button.setTitleColor(.lbWhiteAndWhite, for: .normal)
         button.backgroundColor = .lbBlue
         button.layer.cornerRadius = 16
         button.addTarget(self, action: #selector(filtersButtonTapped), for: .touchUpInside)
+        button.isHidden = true
         return button
-    }()
-    
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU") // Устанавливаем русский язык
-        formatter.dateFormat = "dd.MM.yy" // Формат день.месяц.год, короткая версия года
-        return formatter
     }()
     
     // Публичный метод для обновления данных в collectionView
@@ -116,11 +116,20 @@ final class TrackersViewController: UIViewController {
         filterTrackers(from: allExistingTrackers, for: currentDate)
         filterCategories(from: categories, for: currentDate)
         
+        // Добавляем распознаватель касаний
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false // Разрешает обработку нажатий для других элементов
+        view.addGestureRecognizer(tapGesture)
+        
         setupUI()
         
         Logger.log("Загружен Tracker view контроллер")
     }
     
+    @objc private func dismissKeyboard() {
+        // Скрываем клавиатуру и снимаем фокус с UISearchBar
+        view.endEditing(true)
+    }
     
     private func filterTrackers(from trackers: [Tracker], for date: Date) {
         guard let weekday = Weekday.from(date: date) else { return }
@@ -142,7 +151,7 @@ final class TrackersViewController: UIViewController {
         
         var pinnedTrackers: [Tracker] = []
         var otherCategories: [TrackerCategory] = []
-
+        
         for category in categories {
             var filteredTrackers: [Tracker] = []
             
@@ -162,14 +171,14 @@ final class TrackersViewController: UIViewController {
                 otherCategories.append(TrackerCategory(title: category.title, trackers: filteredTrackers))
             }
         }
-
+        
         if !pinnedTrackers.isEmpty {
             let pinnedCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
             filteredCategories = [pinnedCategory] + otherCategories
         } else {
             filteredCategories = otherCategories
         }
-
+        
         Logger.log("Отфильтрованный список категорий: \(filteredCategories)")
         collectionView.reloadData()
     }
@@ -179,10 +188,6 @@ final class TrackersViewController: UIViewController {
         categories = trackerCategoryStore.categories
         collectionView.reloadData()
         updateEmptyStateVisibility()
-    }
-    
-    func getWeekday(from date: Date) -> Weekday? {
-        return Weekday.from(date: date)
     }
     
     @objc private func addButtonTapped() {
@@ -221,7 +226,7 @@ final class TrackersViewController: UIViewController {
         case .today:
             let currentDate = Date()
             selectedDate = currentDate
-
+            
             if let datePicker = navigationItem.rightBarButtonItem?.customView as? UIDatePicker {
                 datePicker.setDate(currentDate, animated: true)
             }
@@ -245,8 +250,10 @@ final class TrackersViewController: UIViewController {
                 }
                 return trackersInCategory.isEmpty ? nil : TrackerCategory(title: category.title, trackers: trackersInCategory)
             }
-        
+            
         case .uncompleted:
+            filterTrackers(from: allExistingTrackers, for: selectedDate)
+            filterCategories(from: categories, for: selectedDate)
             // Фильтруем только невыполненные трекеры для выбранной даты
             let uncompletedTrackersOnly = filteredTrackers.filter { tracker in
                 !records.contains { record in
@@ -275,16 +282,19 @@ final class TrackersViewController: UIViewController {
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date
-        let weekday = getWeekday(from: selectedDate)
+        let weekday = DateHelper.shared.weekday(from: selectedDate)
         Logger.log("Выбранный день недели: \(String(describing: weekday?.rawValue))")
         
-        let formattedDate = dateFormatter.string(from: selectedDate)
+        let formattedDate = DateHelper.shared.formattedDate(from: selectedDate)
         Logger.log("Выбранная дата: \(formattedDate)")
         
         filterTrackers(from: allExistingTrackers, for: selectedDate)
         
         updateUIAfterTrackerChange()
-        applyFilter(currentFilter)
+        
+        if filtersButton.isEnabled {
+            applyFilter(currentFilter)
+        }
     }
     
     private func setupUI() {
@@ -296,13 +306,15 @@ final class TrackersViewController: UIViewController {
         titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         
         // Plus button creation
-        let addButtonImage = UIImage(named: "AddTrackerPlusBotton")?.withRenderingMode(.alwaysTemplate)
+        let addButtonImage = UIImage(named: "AddTrackerPlusBotton")
         let addButton = UIBarButtonItem(
             image: addButtonImage,
             style: .plain,
             target: self,
             action: #selector(addButtonTapped))
-        addButton.tintColor = .lbBlack
+        
+        addButton.tintColor = .lbBlackAndWhite
+        
         navigationItem.leftBarButtonItem = addButton
         
         // Date picker creation for the right bar button
@@ -311,6 +323,7 @@ final class TrackersViewController: UIViewController {
         datePicker.datePickerMode = .date
         datePicker.locale = Locale(identifier: "ru_RU")
         datePicker.calendar = Calendar(identifier: .gregorian)
+        datePicker.calendar.firstWeekday = 2
         
         let currentDate = Date()
         let calendar = Calendar.current
@@ -324,6 +337,16 @@ final class TrackersViewController: UIViewController {
         searchBar.placeholder = "Поиск"
         searchBar.searchBarStyle = .minimal
         searchBar.delegate = self
+        searchBar.showsCancelButton = false
+        // Удаляем иконку очистки текста
+        if let textField = searchBar.value(forKey: "searchField") as? UITextField {
+            textField.clearButtonMode = .never // Отключаем иконку очистки
+        }
+        
+        // Устанавливаем начальную ширину строки поиска
+        searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalToConstant: view.frame.width - 32)
+        searchBarWidthConstraint.isActive = true
+        
         
         view.addSubview(titleLabel)
         view.addSubview(searchBar)
@@ -363,7 +386,7 @@ final class TrackersViewController: UIViewController {
             filtersButton.heightAnchor.constraint(equalToConstant: 50),
             filtersButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             filtersButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -100),
-
+            
         ])
         
         updateEmptyStateVisibility()
@@ -377,7 +400,7 @@ final class TrackersViewController: UIViewController {
         
         let hasFilteredTrackers = !filteredTrackers.isEmpty
         let isSearchActive = !currentSearchText.isEmpty
-
+        
         if isSearchActive {
             // Когда активен поиск, показываем элементы пустого состояния для поиска
             emptyStateLogo.isHidden = true
@@ -659,14 +682,12 @@ extension TrackersViewController {
             let newRecord = TrackerRecord(trackerId: tracker.id, date: date)
             completedTrackers.append(newRecord)
         }
-        Logger.log("Трекер \(tracker.name) выполнен для даты \(dateFormatter.string(from: date))")
     }
     
     func trackerUncompleted(_ tracker: Tracker, on date: Date) {
         completedTrackers.removeAll { record in
             record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: date)
         }
-        Logger.log("Выполнение трекера \(tracker.name) отменено для даты \(dateFormatter.string(from: date))")
     }
     
     func removeTracker(_ tracker: Tracker) {
@@ -788,9 +809,41 @@ extension TrackersViewController {
 }
 
 extension TrackersViewController: UISearchBarDelegate {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        searchBar.setShowsCancelButton(true, animated: true)
+        
+        if let cancelButton = searchBar.value(forKey: "cancelButton") as? UIButton {
+            cancelButton.setTitle("Отменить", for: .normal)
+        }
+        
+        // Уменьшаем ширину строки поиска, чтобы кнопка "Отменить" поместилась
+        searchBarWidthConstraint.constant = view.frame.width - 200 // Настройте значение под ваши нужды
+        
+        // Принудительно обновляем макет
+        searchBar.layoutIfNeeded()
+        
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         currentSearchText = searchText
         filterTrackersAndCategories(for: searchText)
+    }
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        // Проверяем, пуста ли строка поиска
+        if searchBar.text?.isEmpty ?? true {
+            // Скрываем кнопку "Отменить", если строка поиска пуста
+            searchBar.setShowsCancelButton(false, animated: true)
+        }
+        
+        // Восстанавливаем ширину строки поиска
+        searchBarWidthConstraint.constant = view.frame.width - 32
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {

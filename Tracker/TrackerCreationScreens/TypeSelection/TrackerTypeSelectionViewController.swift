@@ -22,7 +22,7 @@ final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurab
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Привычка", for: .normal)
-        button.backgroundColor = .lbBlack
+        button.backgroundColor = .lbBlackAndWhite
         button.setTitleColor(.lbWhite, for: .normal)
         button.titleLabel?.font = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.layer.cornerRadius = 16
@@ -35,7 +35,7 @@ final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurab
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Нерегулярное событие", for: .normal)
-        button.backgroundColor = .lbBlack
+        button.backgroundColor = .lbBlackAndWhite
         button.setTitleColor(.lbWhite, for: .normal)
         button.titleLabel?.font = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.layer.cornerRadius = 16
@@ -50,7 +50,7 @@ final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurab
         super.viewDidLoad()
         Logger.log("Экран выбора типа трекера загружен")
         
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         setupUI()
     }
     

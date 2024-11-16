@@ -230,7 +230,7 @@ final class NewHabitViewController: UIViewController {
         
         tableView.register(CustomTableViewCellForNewHabit.self, forCellReuseIdentifier: "CustomCellForNewHabit")
         
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         
         // Setup table view
         tableView.delegate = self
@@ -352,7 +352,7 @@ final class NewHabitViewController: UIViewController {
         
         if isTrackerNameValid && isScheduleSelected && isCategorySelected && isEmojiSelected && isColorSelected {
             createButton.isEnabled = true
-            createButton.backgroundColor = UIColor(named: "LB_black")
+            createButton.backgroundColor = UIColor(named: "LB_blackAndWhite")
         } else {
             createButton.isEnabled = false
             createButton.backgroundColor = UIColor(named: "LB_grey")

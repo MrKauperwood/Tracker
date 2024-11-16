@@ -25,13 +25,13 @@ final class ScheduleViewController: UIViewController, ViewConfigurable {
         
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.lbWhite, for: .normal)
+        button.backgroundColor = .lbBlackAndWhite
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         
         button.widthAnchor.constraint(equalToConstant: 335).isActive = true
         button.heightAnchor.constraint(equalToConstant: 60).isActive = true
         
-        button.backgroundColor = .lbBlack
         button.layer.cornerRadius = 16
         
         button.addTarget(self, action: #selector(doneButtonTapped), for: .touchUpInside)
@@ -51,7 +51,7 @@ final class ScheduleViewController: UIViewController, ViewConfigurable {
     }
     
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         addSubviews()
         addConstraints()
     }

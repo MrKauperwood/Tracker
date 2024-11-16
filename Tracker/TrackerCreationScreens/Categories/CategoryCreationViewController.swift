@@ -37,7 +37,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     // MARK: - Private Methods
     
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         setupUI()
         addTapGesture()
     }
@@ -89,7 +89,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
         // Bindings с ViewModel для обновления состояния кнопки и показа ошибок
         viewModel.isDoneButtonEnabled = { [weak self] isEnabled in
             self?.doneButton.isEnabled = isEnabled
-            self?.doneButton.backgroundColor = isEnabled ? UIColor(named: "LB_black") : UIColor(named: "LB_grey")
+            self?.doneButton.backgroundColor = isEnabled ? UIColor(named: "LB_blackAndWhite") : UIColor(named: "LB_grey")
         }
         
         viewModel.errorMessage = { [weak self] message in

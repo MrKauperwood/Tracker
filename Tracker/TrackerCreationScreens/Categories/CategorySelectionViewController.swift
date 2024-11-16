@@ -26,10 +26,10 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
         
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.lbWhite, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         
-        button.backgroundColor = .lbBlack
+        button.backgroundColor = .lbBlackAndWhite
         button.layer.cornerRadius = 16
         
         button.addTarget(self, action: #selector(addButtonTapped), for: .touchUpInside)
@@ -57,7 +57,7 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
             string: "Привычки и события можно объединить по смыслу",
             attributes: [
                 .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-                .foregroundColor: UIColor.lbBlack,
+                .foregroundColor: UIColor.lbBlackAndWhite,
                 .paragraphStyle: paragraphStyle
             ]
         )
@@ -98,8 +98,8 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
     // MARK: - Private Methods
     
     private func setupUI() {
-        view.backgroundColor = .white
-
+        view.backgroundColor = .lbWhite
+        
         setupTableView()
         addSubviews()
         addConstraints()

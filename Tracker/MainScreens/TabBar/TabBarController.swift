@@ -15,8 +15,12 @@ final class TabBarController: UITabBarController {
         viewControllers = [trackerVC, statisticVC]
         
         // Установка серого бордера для Tab Bar
-        tabBar.layer.borderWidth = 0.5 // Устанавливаем ширину границы
-        tabBar.layer.borderColor = UIColor.lightGray.cgColor // Устанавливаем цвет границы
+        tabBar.layer.borderWidth = 0.5 
+        if traitCollection.userInterfaceStyle == .dark {
+            tabBar.layer.borderColor = UIColor.lbBlack.cgColor
+        } else {
+            tabBar.layer.borderColor = UIColor.lightGray.cgColor
+        }
         
         Logger.log("Загружен Tab bar контроллер")
     }
