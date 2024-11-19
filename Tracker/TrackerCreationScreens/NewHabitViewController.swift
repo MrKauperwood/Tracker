@@ -426,13 +426,12 @@ final class NewHabitViewController: UIViewController {
             trackerType: trackerType
         )
         
-        // Создаем объект категории
-        let newCategory = TrackerCategory(title: categoryTitle, trackers: [])
-        
         do {
             if isEditingMode {
-                try trackerStore.updateTracker(with: newTracker.id, newDetails: newTracker)
+                let updatedCategoryName = categoryTitle
+                try trackerStore.updateTracker(with: newTracker.id, updatedTracker: newTracker, updatedCategoryName: updatedCategoryName)
             } else {
+                let newCategory = TrackerCategory(title: categoryTitle, trackers: [])
                 try trackerStore.addTracker(newTracker, to: newCategory)
             }
             

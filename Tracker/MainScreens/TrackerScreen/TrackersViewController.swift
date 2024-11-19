@@ -76,6 +76,20 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
+    private let searchBar: UISearchBar = {
+        let searchBar = UISearchBar()
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        searchBar.placeholder = "Поиск"
+        searchBar.searchBarStyle = .minimal
+        searchBar.showsCancelButton = false
+        
+        if let textField = searchBar.value(forKey: "searchField") as? UITextField {
+            textField.clearButtonMode = .never
+        }
+        
+        return searchBar
+    }()
+    
     private let filtersButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -89,7 +103,6 @@ final class TrackersViewController: UIViewController {
         return button
     }()
     
-    // Публичный метод для обновления данных в collectionView
     public func reloadData() {
         collectionView.reloadData()
         updateEmptyStateVisibility()
@@ -332,16 +345,7 @@ final class TrackersViewController: UIViewController {
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         
-        let searchBar = UISearchBar()
-        searchBar.translatesAutoresizingMaskIntoConstraints = false
-        searchBar.placeholder = "Поиск"
-        searchBar.searchBarStyle = .minimal
         searchBar.delegate = self
-        searchBar.showsCancelButton = false
-        // Удаляем иконку очистки текста
-        if let textField = searchBar.value(forKey: "searchField") as? UITextField {
-            textField.clearButtonMode = .never // Отключаем иконку очистки
-        }
         
         // Устанавливаем начальную ширину строки поиска
         searchBarWidthConstraint = searchBar.widthAnchor.constraint(equalToConstant: view.frame.width - 32)
@@ -393,32 +397,30 @@ final class TrackersViewController: UIViewController {
     }
     
     private func updateEmptyStateVisibility() {
-        
         setupTrackerCategoryStore()
         setupTrackerStore()
         setupTrackerRecordStore()
-        
+        configureEmptyStateVisibility()
+    }
+    
+    private func configureEmptyStateVisibility() {
         let hasFilteredTrackers = !filteredTrackers.isEmpty
         let isSearchActive = !currentSearchText.isEmpty
         
         if isSearchActive {
-            // Когда активен поиск, показываем элементы пустого состояния для поиска
             emptyStateLogo.isHidden = true
             emptyStateTextLabel.isHidden = true
             emptyStateForSearchLogo.isHidden = hasFilteredTrackers
             emptyStateForSearchTextLabel.isHidden = hasFilteredTrackers
         } else {
-            // Когда поиск не активен, показываем элементы пустого состояния для списка трекеров
             emptyStateLogo.isHidden = hasFilteredTrackers
             emptyStateTextLabel.isHidden = hasFilteredTrackers
             emptyStateForSearchLogo.isHidden = true
             emptyStateForSearchTextLabel.isHidden = true
         }
         
-        // Скрываем collectionView, если нет трекеров
         collectionView.isHidden = !hasFilteredTrackers
         filtersButton.isHidden = !hasFilteredTrackers
-        
     }
 }
 
@@ -505,7 +507,7 @@ extension TrackersViewController: UICollectionViewDataSource {
     }
     
     private func updateUIAfterTrackerChange() {
-        //        filterCategories(from: categories, for: selectedDate)
+        filterCategories(from: categories, for: selectedDate)
         filterTrackersAndCategories(for: currentSearchText)
         collectionView.reloadData()
         updateEmptyStateVisibility()
@@ -816,10 +818,7 @@ extension TrackersViewController: UISearchBarDelegate {
             cancelButton.setTitle("Отменить", for: .normal)
         }
         
-        // Уменьшаем ширину строки поиска, чтобы кнопка "Отменить" поместилась
-        searchBarWidthConstraint.constant = view.frame.width - 200 // Настройте значение под ваши нужды
-        
-        // Принудительно обновляем макет
+        searchBarWidthConstraint.constant = view.frame.width - 200
         searchBar.layoutIfNeeded()
         
         UIView.animate(withDuration: 0.3) {
@@ -856,12 +855,9 @@ extension TrackersViewController: UISearchBarDelegate {
     private func filterTrackersAndCategories(for searchText: String) {
         // Сначала фильтруем трекеры по дню недели
         filterTrackers(from: allExistingTrackers, for: selectedDate)
+        filterCategories(from: categories, for: selectedDate)
         
-        if searchText.isEmpty {
-            // Если строка поиска пуста, используем все категории
-            filteredCategories = categories
-            filteredTrackers = categories.flatMap { $0.trackers }
-        } else {
+        if !searchText.isEmpty {
             // Фильтруем трекеры по введенному тексту
             filteredTrackers = filteredTrackers.filter { tracker in
                 tracker.name.lowercased().contains(searchText.lowercased())
@@ -890,7 +886,51 @@ extension TrackersViewController: UISearchBarDelegate {
             filteredCategories.append(contentsOf: remainingCategories)
         }
         
-        updateEmptyStateVisibility()
+        configureEmptyStateVisibility()
         collectionView.reloadData()
+    }
+}
+
+extension TrackersViewController {
+    
+    public func setSearchBarText(_ text: String) {
+        searchBar.text = text
+        currentSearchText = text
+        searchBarTextDidBeginEditing(searchBar)
+        filterTrackersAndCategories(for: text)
+    }
+    
+    public func filterAndReloadData() {
+        filterTrackers(from: allExistingTrackers, for: selectedDate)
+        filterCategories(from: categories, for: selectedDate)
+        collectionView.reloadData()
+        configureEmptyStateVisibility()
+    }
+    
+    var setAllExistingTrackers: [Tracker] {
+        get {
+            return allExistingTrackers
+        }
+        set {
+            allExistingTrackers = newValue
+        }
+    }
+    
+    var setAllExistingCategories: [TrackerCategory] {
+        get {
+            return categories
+        }
+        set {
+            categories = newValue
+        }
+    }
+    
+    var setAllRecords: [TrackerRecord] {
+        get {
+            return records
+        }
+        set {
+            records = newValue
+        }
     }
 }

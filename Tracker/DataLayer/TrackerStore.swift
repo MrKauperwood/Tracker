@@ -6,7 +6,6 @@ protocol TrackerStoreDelegate: AnyObject {
     func store(_ store: TrackerStore, didUpdate update: TrackerStoreUpdate)
 }
 
-// Структура для передачи информации об изменениях
 struct TrackerStoreUpdate {
     struct Move: Hashable {
         let oldIndex: Int
@@ -25,7 +24,6 @@ final class TrackerStore: NSObject {
     // Делегат для передачи обновлений в контроллер
     weak var delegate: TrackerStoreDelegate?
     
-    // Индексы для отслеживания изменений
     private var insertedIndexes: IndexSet?
     private var deletedIndexes: IndexSet?
     private var updatedIndexes: IndexSet?
@@ -94,25 +92,39 @@ final class TrackerStore: NSObject {
         Logger.log("Новый трекер c именем : \"\(tracker.name)\" и категорией \"\(category.title)\" добавлен в CoreData")
     }
     
-    func updateTracker(with id: UUID, newDetails: Tracker) throws {
+    func updateTracker(with id: UUID, updatedTracker: Tracker, updatedCategoryName: String) throws {
         // Создаем запрос на выборку трекера с заданным id
         let request = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         
-        // Ищем трекер в базе данных
         if let trackerEntity = try context.fetch(request).first {
-            // Обновляем свойства трекера
-            trackerEntity.name = newDetails.name
-            trackerEntity.color = UIColorMarshalling().hexString(from: newDetails.color)
-            trackerEntity.emoji = newDetails.emoji
-            trackerEntity.isPinned = newDetails.isPinned
-            trackerEntity.schedule = newDetails.schedule.map { $0.rawValue } as NSObject
-            trackerEntity.trackerType = newDetails.trackerType.rawValue
+            trackerEntity.name = updatedTracker.name
+            trackerEntity.color = UIColorMarshalling().hexString(from: updatedTracker.color)
+            trackerEntity.emoji = updatedTracker.emoji
+            trackerEntity.isPinned = updatedTracker.isPinned
+            trackerEntity.schedule = updatedTracker.schedule.map { $0.rawValue } as NSObject
+            trackerEntity.trackerType = updatedTracker.trackerType.rawValue
             
-            // Сохраняем изменения в контексте
+            let categoryRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+            categoryRequest.predicate = NSPredicate(format: "title == %@", updatedCategoryName)
+            
+            if let newCategory = try context.fetch(categoryRequest).first {
+                if !(newCategory.trackers?.contains { ($0 as? TrackerCoreData)?.id == id } ?? false) {
+                    // Удаляем трекер из предыдущей категории
+                    if let oldCategory = trackerEntity.category {
+                        oldCategory.removeFromTrackers(trackerEntity)
+                    }
+                    // Добавляем трекер в новую категорию
+                    newCategory.addToTrackers(trackerEntity)
+                    trackerEntity.category = newCategory
+                }
+            } else {
+                Logger.log("Категория с именем \(updatedCategoryName) не найдена", level: .error)
+            }
+            
             do {
                 try context.save()
-                Logger.log("Трекер с именем \"\(newDetails.name)\" успешно обновлен в Core Data")
+                Logger.log("Трекер с именем \"\(updatedTracker.name)\" успешно обновлен в Core Data")
             } catch {
                 Logger.log("Ошибка при сохранении изменений трекера: \(error)", level: .error)
                 throw error
