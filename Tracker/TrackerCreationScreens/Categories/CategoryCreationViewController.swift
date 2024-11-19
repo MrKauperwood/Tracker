@@ -160,7 +160,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     private static func makeTitleLabel() -> UILabel {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Новая категория"
+        titleLabel.text = NSLocalizedString("category_creation.title", comment: "")
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         return titleLabel
@@ -168,7 +168,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     private static func makeTextField() -> UITextField {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = NSLocalizedString("category_creation.text_field.placeholder", comment: "")
         textField.returnKeyType = .go
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.heightAnchor.constraint(equalToConstant: 75).isActive = true
@@ -204,7 +204,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     private static func makeDoneButton() -> UIButton {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("category_creation.done_button.title", comment: ""), for: .normal)
         button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = UIColor(named: "LB_grey")

@@ -2,7 +2,7 @@ import UIKit
 
 // MARK: - Constants
 private enum Constants {
-    static let titleText = "Фильтры"
+    static let titleText = NSLocalizedString("filter_options.title", comment: "")
     static let titleFontSize: CGFloat = 16
     static let estimatedRowHeight: CGFloat = 75
     static let tableCornerRadius: CGFloat = 16

@@ -1,3 +1,5 @@
+import Foundation
+
 enum TrackerFilter {
     case allTrackers
     case today
@@ -6,10 +8,14 @@ enum TrackerFilter {
 
     var description: String {
         switch self {
-        case .allTrackers: return "Все трекеры"
-        case .today: return "Трекеры на сегодня"
-        case .completed: return "Завершённые"
-        case .uncompleted: return "Незавершённые"
+        case .allTrackers:
+            return NSLocalizedString("tracker_filter.all_trackers", comment: "")
+        case .today:
+            return NSLocalizedString("tracker_filter.today", comment: "")
+        case .completed:
+            return NSLocalizedString("tracker_filter.completed", comment: "")
+        case .uncompleted:
+            return NSLocalizedString("tracker_filter.uncompleted", comment: "")
         }
     }
 }

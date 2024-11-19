@@ -26,10 +26,10 @@ final class CategoryCreationViewModel {
         let trimmedText = categoryName.trimmingCharacters(in: .whitespacesAndNewlines)
         
         if trimmedText.isEmpty {
-            errorMessage?("Название категории не может быть пустым или состоять только из пробелов")
+            errorMessage?(NSLocalizedString("category_creation.error.empty_name", comment: ""))
             isDoneButtonEnabled?(false)
         } else if trimmedText.count > 38 {
-            errorMessage?("Ограничение 38 символов")
+            errorMessage?(NSLocalizedString("category_creation.error.character_limit", comment: ""))
             isDoneButtonEnabled?(false)
         } else {
             errorMessage?(nil)

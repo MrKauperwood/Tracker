@@ -21,6 +21,7 @@
 		F082AAEE2CE82955004765F3 /* DateHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F082AAED2CE82953004765F3 /* DateHelper.swift */; };
 		F082AAF12CE93807004765F3 /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = F082AAF02CE93807004765F3 /* InlineSnapshotTesting */; };
 		F082AAF32CE93807004765F3 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = F082AAF22CE93807004765F3 /* SnapshotTesting */; };
+		F082AAF92CED0197004765F3 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F082AAF82CED0197004765F3 /* Localizable.xcstrings */; };
 		F0A843A42C9D7D7A0059C8A8 /* Tracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A843A32C9D7D7A0059C8A8 /* Tracker.swift */; };
 		F0A843A62C9D7D8E0059C8A8 /* TrackerCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A843A52C9D7D8E0059C8A8 /* TrackerCategory.swift */; };
 		F0A843A82C9D7D9B0059C8A8 /* TrackerRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A843A72C9D7D9B0059C8A8 /* TrackerRecord.swift */; };
@@ -85,6 +86,7 @@
 		F06446BE2CC919410093145F /* CategorySelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionViewModel.swift; sourceTree = "<group>"; };
 		F06446C02CC9242E0093145F /* CategorySelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionViewController.swift; sourceTree = "<group>"; };
 		F082AAED2CE82953004765F3 /* DateHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelper.swift; sourceTree = "<group>"; };
+		F082AAF82CED0197004765F3 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		F0A843A32C9D7D7A0059C8A8 /* Tracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tracker.swift; sourceTree = "<group>"; };
 		F0A843A52C9D7D8E0059C8A8 /* TrackerCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerCategory.swift; sourceTree = "<group>"; };
 		F0A843A72C9D7D9B0059C8A8 /* TrackerRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackerRecord.swift; sourceTree = "<group>"; };
@@ -190,6 +192,14 @@
 			path = Categories;
 			sourceTree = "<group>";
 		};
+		F082AAF42CECFEDC004765F3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F082AAF82CED0197004765F3 /* Localizable.xcstrings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		F0A843A12C9D7D640059C8A8 /* Structures */ = {
 			isa = PBXGroup;
 			children = (
@@ -251,6 +261,7 @@
 		F0C5305B2C89DF8A0071DBEA /* Tracker */ = {
 			isa = PBXGroup;
 			children = (
+				F082AAF42CECFEDC004765F3 /* Resources */,
 				F0079DC62CC8B0B200A7AF66 /* Onboarding */,
 				F010A0CB2CAEEF1B00658C89 /* DataLayer */,
 				F010A08B2CAD363400658C89 /* CoreData */,
@@ -437,11 +448,13 @@
 			};
 			buildConfigurationList = F0C530542C89DF8A0071DBEA /* Build configuration list for PBXProject "Tracker" */;
 			compatibilityVersion = "Xcode 14.0";
-			developmentRegion = en;
+			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ru,
+				fi,
 			);
 			mainGroup = F0C530502C89DF8A0071DBEA;
 			packageReferences = (
@@ -465,6 +478,7 @@
 			files = (
 				F0C530692C89DF8C0071DBEA /* Assets.xcassets in Resources */,
 				F0C5306C2C89DF8C0071DBEA /* Base in Resources */,
+				F082AAF92CED0197004765F3 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -580,6 +594,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -634,6 +649,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -643,6 +659,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -690,6 +707,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

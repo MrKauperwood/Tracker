@@ -36,11 +36,11 @@ final class OnboardingContentViewController: UIViewController, ViewConfigurable 
     
     // MARK: - Properties
     
-    var buttonAction: (() -> Void)?  // Closure для передачи действия
+    var buttonAction: (() -> Void)?
     
     // MARK: - Initializers
     
-    init(titleText: String, backgroundImageName: String, buttonTitle: String = "Вот это технологии!") {
+    init(titleText: String, backgroundImageName: String, buttonTitle: String = NSLocalizedString("onboarding.button.title", comment: "")) {
         super.init(nibName: nil, bundle: nil)
         
         titleLabel.text = titleText

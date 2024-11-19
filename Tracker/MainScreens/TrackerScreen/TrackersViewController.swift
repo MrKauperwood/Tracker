@@ -52,7 +52,7 @@ final class TrackersViewController: UIViewController {
     private let emptyStateTextLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Что будем отслеживать?"
+        label.text = NSLocalizedString("trackers.empty_state.main_logo_text", comment: "")
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
         label.textColor = .lbBlackAndWhite
         label.isHidden = true
@@ -69,7 +69,7 @@ final class TrackersViewController: UIViewController {
     private let emptyStateForSearchTextLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Ничего не найдено"
+        label.text = NSLocalizedString("trackers.empty_state.search_logo_text", comment: "")
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
         label.textColor = .lbBlackAndWhite
         label.isHidden = true
@@ -79,7 +79,7 @@ final class TrackersViewController: UIViewController {
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.translatesAutoresizingMaskIntoConstraints = false
-        searchBar.placeholder = "Поиск"
+        searchBar.placeholder = NSLocalizedString("trackers.searchbar.placeholder", comment: "")
         searchBar.searchBarStyle = .minimal
         searchBar.showsCancelButton = false
         
@@ -93,7 +93,7 @@ final class TrackersViewController: UIViewController {
     private let filtersButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Фильтры", for: .normal)
+        button.setTitle(NSLocalizedString("trackers.filters_button.title", comment: ""), for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 17, weight: .regular)
         button.setTitleColor(.lbWhiteAndWhite, for: .normal)
         button.backgroundColor = .lbBlue
@@ -101,6 +101,20 @@ final class TrackersViewController: UIViewController {
         button.addTarget(self, action: #selector(filtersButtonTapped), for: .touchUpInside)
         button.isHidden = true
         return button
+    }()
+    
+    private let datePicker: UIDatePicker = {
+        let datePicker = UIDatePicker()
+        datePicker.preferredDatePickerStyle = .compact
+        datePicker.datePickerMode = .date
+        
+        let currentLocale = Locale.current
+        datePicker.locale = currentLocale
+        
+        datePicker.calendar = Calendar(identifier: .gregorian)
+        datePicker.calendar.firstWeekday = 2
+        
+        return datePicker
     }()
     
     public func reloadData() {
@@ -186,7 +200,7 @@ final class TrackersViewController: UIViewController {
         }
         
         if !pinnedTrackers.isEmpty {
-            let pinnedCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
+            let pinnedCategory = TrackerCategory(title: NSLocalizedString("trackers.pinned_category.title", comment: ""), trackers: pinnedTrackers)
             filteredCategories = [pinnedCategory] + otherCategories
         } else {
             filteredCategories = otherCategories
@@ -312,13 +326,11 @@ final class TrackersViewController: UIViewController {
     
     private func setupUI() {
         
-        // Page title creation
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Трекеры"
+        titleLabel.text = NSLocalizedString("tabbar.trackers.title", comment: "")
         titleLabel.font = UIFont.systemFont(ofSize: 34, weight: .bold)
         
-        // Plus button creation
         let addButtonImage = UIImage(named: "AddTrackerPlusBotton")
         let addButton = UIBarButtonItem(
             image: addButtonImage,
@@ -331,20 +343,21 @@ final class TrackersViewController: UIViewController {
         navigationItem.leftBarButtonItem = addButton
         
         // Date picker creation for the right bar button
-        let datePicker = UIDatePicker()
-        datePicker.preferredDatePickerStyle = .compact
-        datePicker.datePickerMode = .date
-        datePicker.locale = Locale(identifier: "ru_RU")
-        datePicker.calendar = Calendar(identifier: .gregorian)
-        datePicker.calendar.firstWeekday = 2
+//        let datePicker = UIDatePicker()
+//        datePicker.preferredDatePickerStyle = .compact
+//        datePicker.datePickerMode = .date
+//        datePicker.locale = Locale(identifier: "ru_RU")
+//        datePicker.calendar = Calendar(identifier: .gregorian)
+//        datePicker.calendar.firstWeekday = 2
         
-        let currentDate = Date()
-        let calendar = Calendar.current
-        datePicker.maximumDate = currentDate
+//        let currentDate = Date()
+//        let calendar = Calendar.current
+//        datePicker.maximumDate = currentDate
         
-        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+//        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
+//        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
         
+        setupDatePicker()
         searchBar.delegate = self
         
         // Устанавливаем начальную ширину строки поиска
@@ -394,6 +407,15 @@ final class TrackersViewController: UIViewController {
         ])
         
         updateEmptyStateVisibility()
+    }
+    
+    private func setupDatePicker() {
+        let currentDate = Date()
+        let calendar = Calendar.current
+        datePicker.maximumDate = currentDate
+
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
     }
     
     private func updateEmptyStateVisibility() {
@@ -562,19 +584,19 @@ extension TrackersViewController: UICollectionViewDelegate {
     private func makeContextMenu(for tracker: Tracker) -> UIMenu {
         
         let pinAction = UIAction(
-            title: tracker.isPinned ? "Открепить" : "Закрепить"
+            title: tracker.isPinned ? NSLocalizedString("trackers.unpin_action.title", comment: "") : NSLocalizedString("trackers.pin_action.title", comment: "")
         ) { _ in
             self.togglePin(for: tracker)
         }
         
         let editAction = UIAction(
-            title: "Редактировать"
+            title: NSLocalizedString("trackers.edit_action.title", comment: "n")
         ) { _ in
             self.editTracker(tracker)
         }
         
         let deleteAction = UIAction(
-            title: "Удалить",
+            title: NSLocalizedString("trackers.delete_action.title", comment: ""),
             attributes: .destructive
         ) { _ in
             self.deleteTracker(tracker)
@@ -633,9 +655,9 @@ extension TrackersViewController: UICollectionViewDelegate {
     }
     
     private func deleteTracker(_ tracker: Tracker) {
-        let alertController = UIAlertController(title: "", message: "Уверены, что хотите удалить трекер?", preferredStyle: .actionSheet)
+        let alertController = UIAlertController(title: "", message: NSLocalizedString("trackers.delete_confirmation.message", comment: ""), preferredStyle: .actionSheet)
         
-        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+        let deleteAction = UIAlertAction(title: NSLocalizedString("trackers.delete_action.title", comment: ""), style: .destructive) { _ in
             do {
                 // Удаляем трекер из store
                 try self.trackerStore.deleteTracker(tracker)
@@ -648,7 +670,7 @@ extension TrackersViewController: UICollectionViewDelegate {
             }
         }
         
-        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: NSLocalizedString("trackers.cancel_action.title", comment: ""), style: .cancel, handler: nil)
         
         alertController.addAction(deleteAction)
         alertController.addAction(cancelAction)
@@ -815,7 +837,7 @@ extension TrackersViewController: UISearchBarDelegate {
         searchBar.setShowsCancelButton(true, animated: true)
         
         if let cancelButton = searchBar.value(forKey: "cancelButton") as? UIButton {
-            cancelButton.setTitle("Отменить", for: .normal)
+            cancelButton.setTitle(NSLocalizedString("trackers.cancel_action.title", comment: ""), for: .normal)
         }
         
         searchBarWidthConstraint.constant = view.frame.width - 200
@@ -870,7 +892,7 @@ extension TrackersViewController: UISearchBarDelegate {
             // Создаем временную категорию "Закрепленные" и добавляем её в начало списка, если есть закрепленные трекеры
             filteredCategories = []
             if !pinnedTrackers.isEmpty {
-                let pinnedCategory = TrackerCategory(title: "Закрепленные", trackers: pinnedTrackers)
+                let pinnedCategory = TrackerCategory(title: NSLocalizedString("trackers.pinned_category.title", comment: ""), trackers: pinnedTrackers)
                 filteredCategories.append(pinnedCategory)
             }
             

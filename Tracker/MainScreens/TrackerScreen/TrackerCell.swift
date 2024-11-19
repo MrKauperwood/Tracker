@@ -163,7 +163,7 @@ final class TrackerCell: UICollectionViewCell {
             increaseDayButton.setImage(doneImage, for: .normal)
             increaseDayButton.tintColor = .lbWhite
             increaseDayButton.setTitle(nil, for: .normal)
-            increaseDayButton.imageView?.contentMode = .scaleAspectFit // Устанавливаем корректный режим отображения
+            increaseDayButton.imageView?.contentMode = .scaleAspectFit
             
             if let imageView = increaseDayButton.imageView {
                 increaseDayButton.bringSubviewToFront(imageView)

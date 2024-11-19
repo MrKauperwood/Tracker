@@ -21,7 +21,7 @@ final class NewHabitViewController: UIViewController {
     
     public lazy var textField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
+        textField.placeholder = NSLocalizedString("new_habit.text_field.placeholder", comment: "")
         textField.returnKeyType = .go
         
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -66,7 +66,8 @@ final class NewHabitViewController: UIViewController {
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = isEditingMode ? "Редактирование привычки" : "Новая привычка"
+        titleLabel.text = isEditingMode
+        ? NSLocalizedString("new_habit.title.edit_habit", comment: "") : NSLocalizedString("new_habit.title.new_habit", comment: "")
         
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
@@ -124,10 +125,10 @@ final class NewHabitViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("new_habit.cancel_button.title", comment: ""), for: .normal)
         
-        button.setTitleColor(UIColor(named: "LB_red"), for: .normal) // Применяем цвет текста
-        button.layer.borderColor = UIColor(named: "LB_red")?.cgColor // Цвет бордера из ассетов
+        button.setTitleColor(UIColor(named: "LB_red"), for: .normal)
+        button.layer.borderColor = UIColor(named: "LB_red")?.cgColor
         button.layer.borderWidth = 1 // Ширина бордера
         button.layer.cornerRadius = 16 // Радиус скругления
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -141,9 +142,9 @@ final class NewHabitViewController: UIViewController {
         
         let button = UIButton(type: .system)
         if !isEditingMode {
-            button.setTitle("Создать", for: .normal)
+            button.setTitle(NSLocalizedString("new_habit.create_button.title.create", comment: ""), for: .normal)
         } else {
-            button.setTitle("Сохранить", for: .normal)
+            button.setTitle(NSLocalizedString("new_habit.create_button.title.save", comment: ""), for: .normal)
         }
         
         button.setTitleColor(UIColor(named: "LB_white"), for: .normal)
@@ -168,7 +169,9 @@ final class NewHabitViewController: UIViewController {
     }()
     
     private var tableData: [String] {
-        return trackerType == .habit ? ["Категория", "Расписание"] : ["Категория"]
+        return trackerType == .habit ? [
+            NSLocalizedString("new_habit.table_row.category", comment: ""),
+            NSLocalizedString("new_habit.table_row.schedule", comment: "")] : [NSLocalizedString("new_habit.table_row.category", comment: "")]
     }
     private let emojis = ["😊", "😻", "🌸", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🏅", "🎸", "🏖", "😪"]
     private let colors: [UIColor] = [
@@ -183,9 +186,11 @@ final class NewHabitViewController: UIViewController {
         super.viewDidLoad()
         Logger.log("Экран создания новой привычки загружен")
         
-        titleLabel.text = trackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
+        titleLabel.text = trackerType == .habit
+            ? NSLocalizedString("new_habit.title.new_habit", comment: "")
+            : NSLocalizedString("new_habit.title.new_irregular_event", comment: "")
         if isEditingMode {
-            titleLabel.text = "Редактирование привычки"
+            titleLabel.text = NSLocalizedString("new_habit.title.edit_habit", comment: "")
             counterLabel.isHidden = false
         } else {
             counterLabel.isHidden = true
@@ -326,7 +331,7 @@ final class NewHabitViewController: UIViewController {
         
         // Проверяем длину текста
         if let text = textField.text, text.count > 38 {
-            errorLabel.text = "Ограничение 38 символов"
+            errorLabel.text = NSLocalizedString("new_habit.error_label.text", comment: "")
             errorLabel.isHidden = false
         } else {
             errorLabel.isHidden = true
@@ -365,9 +370,9 @@ final class NewHabitViewController: UIViewController {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SectionHeaderView.identifier, for: indexPath) as! SectionHeaderView
         
         if indexPath.section == 0 {
-            header.title = "Emoji"
+            header.title = NSLocalizedString("new_habit.section_header.emoji", comment: "")
         } else {
-            header.title = "Цвет"
+            header.title = NSLocalizedString("new_habit.section_header.color", comment: "")
         }
         
         return header
@@ -550,7 +555,7 @@ extension NewHabitViewController: UITableViewDataSource {
             if trackerType == .habit {
                 // Если это привычка, показываем расписание
                 if selectedSchedule.count == Weekday.allCases.count {
-                    cell.configureDescription("Каждый день")
+                    cell.configureDescription(NSLocalizedString("new_habit.schedule.every_day", comment: ""))
                 } else {
                     let sortedDays = selectedSchedule.sorted { Weekday.orderedWeekdays.firstIndex(of: $0)! < Weekday.orderedWeekdays.firstIndex(of: $1)! }
                     cell.configureDescription(sortedDays.isEmpty ? "" : sortedDays.map { $0.shortName }.joined(separator: ", "))

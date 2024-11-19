@@ -5,8 +5,10 @@ struct DateHelper {
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.locale = Locale.current
         formatter.dateFormat = "dd.MM.yy"
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
         return formatter
     }()
     

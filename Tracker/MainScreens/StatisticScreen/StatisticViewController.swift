@@ -14,10 +14,10 @@ final class StatisticViewController: UIViewController, ViewConfigurable {
     }
     
     private var statistics = [
-        (number: -1, description: "Лучший период"),
-        (number: -1, description: "Идеальные дни"),
-        (number: -1, description: "Трекеров завершено"),
-        (number: -1, description: "Среднее значение")
+        (number: -1, description: NSLocalizedString("statistics.best_period", comment: "")),
+        (number: -1, description: NSLocalizedString("statistics.perfect_days", comment: "")),
+        (number: -1, description: NSLocalizedString("statistics.trackers_completed", comment: "")),
+        (number: -1, description: NSLocalizedString("statistics.average_value", comment: ""))
     ]
     
     private var trackerStore: TrackerStore!
@@ -36,7 +36,7 @@ final class StatisticViewController: UIViewController, ViewConfigurable {
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Статистика"
+        titleLabel.text = NSLocalizedString("statistics.title", comment: "")
         titleLabel.font = UIFont.systemFont(ofSize: Constants.titleFontSize, weight: .bold)
         return titleLabel
     }()
@@ -50,7 +50,7 @@ final class StatisticViewController: UIViewController, ViewConfigurable {
     private let emptyStateTextLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Анализировать пока нечего"
+        label.text = NSLocalizedString("statistics.empty_state_text", comment: "")
         label.font = UIFont.systemFont(ofSize: Constants.labelFontSize, weight: .regular)
         label.textColor = .lbBlackAndWhite
         return label

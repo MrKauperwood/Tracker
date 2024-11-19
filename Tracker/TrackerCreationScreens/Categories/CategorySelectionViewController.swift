@@ -8,7 +8,7 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        titleLabel.text = "Категория"
+        titleLabel.text = NSLocalizedString("category_selection.title", comment: "")
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         return titleLabel
@@ -21,7 +21,7 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
     
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(NSLocalizedString("category_selection.add_button", comment: ""), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -54,7 +54,7 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
         paragraphStyle.alignment = .center
         
         let attributedString = NSAttributedString(
-            string: "Привычки и события можно объединить по смыслу",
+            string: NSLocalizedString("category_selection.empty_state_text", comment: ""),
             attributes: [
                 .font: UIFont.systemFont(ofSize: 12, weight: .medium),
                 .foregroundColor: UIColor.lbBlackAndWhite,
@@ -264,13 +264,13 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
     private func makeContextMenu(for category: TrackerCategory) -> UIMenu {
         
         let editAction = UIAction(
-            title: "Редактировать"
+            title: NSLocalizedString("category_selection.edit_action", comment: "")
         ) { _ in
             self.editCategory(category)
         }
         
         let deleteAction = UIAction(
-            title: "Удалить",
+            title: NSLocalizedString("category_selection.delete_action", comment: ""),
             attributes: .destructive
         ) { _ in
             self.removeCategory(category)
@@ -298,10 +298,10 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
     }
     
     private func removeCategory(_ category: TrackerCategory) {
-        let alertController = UIAlertController(title: "", message: "Эта категория точно не нужна?", preferredStyle: .actionSheet)
+        let alertController = UIAlertController(title: "", message: NSLocalizedString("category_selection.delete_confirmation", comment: ""), preferredStyle: .actionSheet)
         
         let editViewModel = CategoryCreationViewModel()
-        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { _ in
+        let deleteAction = UIAlertAction(title: NSLocalizedString("category_selection.delete_action", comment: ""), style: .destructive) { _ in
             do {
                 self.viewModel.removeCategory(category)
                 self.viewModel.fetchCategories()
@@ -313,7 +313,7 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
             
         }
         
-        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: NSLocalizedString("category_selection.cancel_action", comment: ""), style: .cancel, handler: nil)
         
         alertController.addAction(deleteAction)
         alertController.addAction(cancelAction)

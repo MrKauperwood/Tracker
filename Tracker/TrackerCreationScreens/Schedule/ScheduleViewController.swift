@@ -6,7 +6,7 @@ final class ScheduleViewController: UIViewController, ViewConfigurable {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        titleLabel.text = "Расписание"
+        titleLabel.text = NSLocalizedString("schedule.title", comment: "")
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         return titleLabel
@@ -20,7 +20,7 @@ final class ScheduleViewController: UIViewController, ViewConfigurable {
     
     private let doneButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("schedule.done_button", comment: ""), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -127,7 +127,7 @@ final class ScheduleViewController: UIViewController, ViewConfigurable {
     }
     
     @objc func doneButtonTapped() {
-        onScheduleSelected?(selectedDays) // Передаем выбранные дни обратно
+        onScheduleSelected?(selectedDays)
         dismiss(animated: true, completion: nil)
         Logger.log("Выбранные дни: \(selectedDays.map { $0.rawValue }.joined(separator: ", "))")
     }
@@ -143,7 +143,7 @@ extension ScheduleViewController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 1 { // Предположим, что строка с "Расписание" — вторая в списке (индекс 1)
+        if indexPath.row == 1 { // строка с "Расписание" — вторая в списке (индекс 1)
             let scheduleVC = ScheduleViewController()
             scheduleVC.selectedDays = self.selectedDays // Передаем текущие выбранные дни в контроллер расписания
             scheduleVC.onScheduleSelected = { [weak self] selectedDays in
@@ -169,7 +169,8 @@ extension ScheduleViewController: UITableViewDataSource {
         
         // Получаем текущий день недели
         let day = Weekday.allCases[indexPath.row]
-        cell.textLabel?.text = day.rawValue
+        let localizedDayName = NSLocalizedString(day.rawValue, comment: "")
+        cell.textLabel?.text = localizedDayName
         
         cell.backgroundColor = .lbBackground
         

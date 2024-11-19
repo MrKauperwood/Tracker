@@ -22,34 +22,37 @@ struct Tracker {
 }
 
 enum Weekday: String, CaseIterable {
-    case monday = "Понедельник"
-    case tuesday = "Вторник"
-    case wednesday = "Среда"
-    case thursday = "Четверг"
-    case friday = "Пятница"
-    case saturday = "Суббота"
-    case sunday = "Воскресенье"
+    case monday
+    case tuesday
+    case wednesday
+    case thursday
+    case friday
+    case saturday
+    case sunday
+
+    var localizedName: String {
+        return NSLocalizedString(self.rawValue, comment: "")
+    }
     
     var shortName: String {
         switch self {
         case .monday:
-            return "Пн"
+            return NSLocalizedString("monday_short", comment: "")
         case .tuesday:
-            return "Вт"
+            return NSLocalizedString("tuesday_short", comment: "")
         case .wednesday:
-            return "Ср"
+            return NSLocalizedString("wednesday_short", comment: "")
         case .thursday:
-            return "Чт"
+            return NSLocalizedString("thursday_short", comment: "")
         case .friday:
-            return "Пт"
+            return NSLocalizedString("friday_short", comment: "")
         case .saturday:
-            return "Сб"
+            return NSLocalizedString("saturday_short", comment: "")
         case .sunday:
-            return "Вс"
+            return NSLocalizedString("sunday_short", comment: "")
         }
     }
     
-    // Метод для упорядочивания дней недели
     static let orderedWeekdays: [Weekday] = [
         .monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday
     ]
@@ -58,7 +61,7 @@ enum Weekday: String, CaseIterable {
 extension Weekday {
     static func from(date: Date) -> Weekday? {
         let calendar = Calendar.current
-        let weekdayNumber = calendar.component(.weekday, from: date) // 1 - Воскресенье, 2 - Понедельник и т.д.
+        let weekdayNumber = calendar.component(.weekday, from: date)
         
         switch weekdayNumber {
         case 1:
