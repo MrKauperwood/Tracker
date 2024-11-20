@@ -28,6 +28,7 @@ final class TrackersViewController: UIViewController {
     private var currentFilter: TrackerFilter = .allTrackers
     
     private var currentSearchText: String = ""
+    private let analyticsService = AnalyticsService()
     
     // Добавляем констрейнт для ширины строки поиска
     private var searchBarWidthConstraint: NSLayoutConstraint!
@@ -151,6 +152,12 @@ final class TrackersViewController: UIViewController {
         setupUI()
         
         Logger.log("Загружен Tracker view контроллер")
+        analyticsService.report(event: "open", screen: "Main")
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        analyticsService.report(event: "close", screen: "Main")
     }
     
     @objc private func dismissKeyboard() {
@@ -219,6 +226,7 @@ final class TrackersViewController: UIViewController {
     
     @objc private func addButtonTapped() {
         Logger.log("Кнопка '+' нажата, открытие экрана выбора типа трекера")
+        analyticsService.report(event: "click", screen: "Main", item: "add_track")
         let trackerTypeVC = TrackerTypeSelectionViewController()
         
         //нужно передать ссылку на trackerStore
@@ -234,6 +242,7 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func filtersButtonTapped() {
+        analyticsService.report(event: "click", screen: "Main", item: "filter")
         let filterVC = FilterOptionsViewController()
         filterVC.selectedFilter = currentFilter
         filterVC.filterSelected = { [weak self] selectedFilter in
@@ -342,21 +351,6 @@ final class TrackersViewController: UIViewController {
         
         navigationItem.leftBarButtonItem = addButton
         
-        // Date picker creation for the right bar button
-//        let datePicker = UIDatePicker()
-//        datePicker.preferredDatePickerStyle = .compact
-//        datePicker.datePickerMode = .date
-//        datePicker.locale = Locale(identifier: "ru_RU")
-//        datePicker.calendar = Calendar(identifier: .gregorian)
-//        datePicker.calendar.firstWeekday = 2
-        
-//        let currentDate = Date()
-//        let calendar = Calendar.current
-//        datePicker.maximumDate = currentDate
-        
-//        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
-//        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
-        
         setupDatePicker()
         searchBar.delegate = self
         
@@ -460,9 +454,10 @@ extension TrackersViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "trackerCell", for: indexPath) as! TrackerCell
         let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
+        
+        analyticsService.report(event: "click", screen: "Main", item: "track")
         
         // Проверяем, выполнен ли трекер для выбранной даты (selectedDate)
         let isCompleted = records.contains { record in
@@ -592,6 +587,7 @@ extension TrackersViewController: UICollectionViewDelegate {
         let editAction = UIAction(
             title: NSLocalizedString("trackers.edit_action.title", comment: "n")
         ) { _ in
+            self.analyticsService.report(event: "click", screen: "Main", item: "edit")
             self.editTracker(tracker)
         }
         
@@ -599,6 +595,7 @@ extension TrackersViewController: UICollectionViewDelegate {
             title: NSLocalizedString("trackers.delete_action.title", comment: ""),
             attributes: .destructive
         ) { _ in
+            self.analyticsService.report(event: "click", screen: "Main", item: "delete")
             self.deleteTracker(tracker)
         }
         
