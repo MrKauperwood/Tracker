@@ -3,7 +3,7 @@ import UIKit
 final class CategoryCreationViewController: UIViewController, ViewConfigurable, UITextFieldDelegate {
     
     // MARK: - Public Method
-
+    
     func setTitleAndCategory(_ title: String, andCategoryName categoryName: String) {
         titleLabel.text = title
         textField.text = categoryName

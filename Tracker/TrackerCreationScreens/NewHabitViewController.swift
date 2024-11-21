@@ -187,8 +187,8 @@ final class NewHabitViewController: UIViewController {
         Logger.log("Экран создания новой привычки загружен")
         
         titleLabel.text = trackerType == .habit
-            ? NSLocalizedString("new_habit.title.new_habit", comment: "")
-            : NSLocalizedString("new_habit.title.new_irregular_event", comment: "")
+        ? NSLocalizedString("new_habit.title.new_habit", comment: "")
+        : NSLocalizedString("new_habit.title.new_irregular_event", comment: "")
         if isEditingMode {
             titleLabel.text = NSLocalizedString("new_habit.title.edit_habit", comment: "")
             counterLabel.isHidden = false

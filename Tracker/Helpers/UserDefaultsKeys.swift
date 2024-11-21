@@ -2,7 +2,7 @@ import Foundation
 
 enum UserDefaultsKeys: String {
     case onboardingCompleted
-
+    
 }
 
 extension UserDefaults {

@@ -74,10 +74,10 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
     
     func addConstraints() {
         NSLayoutConstraint.activate([
-            borderView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            borderView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 4),
             borderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
             borderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            borderView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            borderView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -4),
             
             numberLabel.topAnchor.constraint(equalTo: borderView.topAnchor, constant: Constants.numberLabelTopPadding),
             numberLabel.leadingAnchor.constraint(equalTo: borderView.leadingAnchor, constant: Constants.numberLabelTopPadding),

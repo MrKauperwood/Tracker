@@ -237,7 +237,7 @@ extension StatisticViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         let spacerView = UIView()
-        spacerView.backgroundColor = .clear // Пустой прозрачный вид
+        spacerView.backgroundColor = .clear
         return spacerView
     }
 }

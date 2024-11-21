@@ -30,7 +30,6 @@ final class TrackersViewController: UIViewController {
     private var currentSearchText: String = ""
     private let analyticsService = AnalyticsService()
     
-    // Добавляем констрейнт для ширины строки поиска
     private var searchBarWidthConstraint: NSLayoutConstraint!
     
     private let collectionView: UICollectionView = {
@@ -313,6 +312,18 @@ final class TrackersViewController: UIViewController {
         emptyStateForSearchLogo.isHidden = isHidden
         emptyStateForSearchTextLabel.isHidden = isHidden
         
+        if (filtersButton.isHidden) {
+            emptyStateLogo.isHidden = false
+            emptyStateTextLabel.isHidden = false
+            emptyStateForSearchLogo.isHidden = true
+            emptyStateForSearchTextLabel.isHidden = true
+            
+        } else {
+            emptyStateForSearchLogo.isHidden = isHidden
+            emptyStateForSearchTextLabel.isHidden = isHidden
+            emptyStateLogo.isHidden = true
+            emptyStateTextLabel.isHidden = true
+        }
         collectionView.reloadData()
     }
     
@@ -407,7 +418,7 @@ final class TrackersViewController: UIViewController {
         let currentDate = Date()
         let calendar = Calendar.current
         datePicker.maximumDate = currentDate
-
+        
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
     }
@@ -568,12 +579,53 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 extension TrackersViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell else {
+            return nil
+        }
         
-        let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
+        // Проверяем, попала ли точка в `topContainerView`
+        let topContainerFrame = cell.convert(cell.topContainerView.frame, to: collectionView)
+        guard topContainerFrame.contains(point) else {
+            return nil
+        }
         
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+        return UIContextMenuConfiguration(
+            identifier: "\(indexPath.section)-\(indexPath.item)" as NSString, // Уникальный идентификатор для каждой ячейки
+            previewProvider: nil
+        ) { _ in
+            let tracker = self.filteredCategories[indexPath.section].trackers[indexPath.item]
             return self.makeContextMenu(for: tracker)
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, previewForHighlightingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        guard let identifier = configuration.identifier as? String else { return nil }
+        
+        // Разделяем строку и конвертируем её в индексы
+        let sectionAndItem = identifier.split(separator: "-").compactMap { Int($0) }
+        guard sectionAndItem.count == 2 else { return nil }
+        
+        let indexPath = IndexPath(item: sectionAndItem[1], section: sectionAndItem[0])
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell else { return nil }
+        
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        return UITargetedPreview(view: cell.topContainerView, parameters: parameters)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, previewForDismissingContextMenuWithConfiguration configuration: UIContextMenuConfiguration) -> UITargetedPreview? {
+        guard let identifier = configuration.identifier as? String else { return nil }
+        
+        // Разделяем строку и конвертируем её в индексы
+        let sectionAndItem = identifier.split(separator: "-").compactMap { Int($0) }
+        guard sectionAndItem.count == 2 else { return nil }
+        
+        let indexPath = IndexPath(item: sectionAndItem[1], section: sectionAndItem[0])
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackerCell else { return nil }
+        
+        let parameters = UIPreviewParameters()
+        parameters.backgroundColor = .clear
+        return UITargetedPreview(view: cell.topContainerView, parameters: parameters)
     }
     
     private func makeContextMenu(for tracker: Tracker) -> UIMenu {

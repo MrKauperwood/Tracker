@@ -5,7 +5,7 @@ final class TrackerCell: UICollectionViewCell {
     var increaseDayCounterButtonTapped: ((Int) -> Void)?
     private var isTrackerCompleted: Bool = false
     
-    private let topContainerView: UIView = {
+    let topContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.backgroundColor = .lbCS5Green

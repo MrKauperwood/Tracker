@@ -60,7 +60,7 @@ final class OnboardingContentViewController: UIViewController, ViewConfigurable 
     }
     
     // MARK: - Setup UI
-
+    
     private func setupUI() {
         addSubviews()
         addConstraints()
