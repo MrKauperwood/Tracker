@@ -400,7 +400,7 @@ final class NewHabitViewController: UIViewController {
         return totalHeight
     }
     
-    @objc func createButtonTapped() {
+    @objc private func createButtonTapped() {
         
         // Проверяем, введено ли имя трекера
         guard let trackerName = textField.text, !trackerName.isEmpty else {

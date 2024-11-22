@@ -327,7 +327,7 @@ final class TrackersViewController: UIViewController {
         collectionView.reloadData()
     }
     
-    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+    @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         selectedDate = sender.date
         let weekday = DateHelper.shared.weekday(from: selectedDate)
         Logger.log("Выбранный день недели: \(String(describing: weekday?.rawValue))")
@@ -632,23 +632,23 @@ extension TrackersViewController: UICollectionViewDelegate {
         
         let pinAction = UIAction(
             title: tracker.isPinned ? NSLocalizedString("trackers.unpin_action.title", comment: "") : NSLocalizedString("trackers.pin_action.title", comment: "")
-        ) { _ in
-            self.togglePin(for: tracker)
+        ) { [weak self] _ in
+            self?.togglePin(for: tracker)
         }
         
         let editAction = UIAction(
             title: NSLocalizedString("trackers.edit_action.title", comment: "n")
-        ) { _ in
-            self.analyticsService.report(event: "click", screen: "Main", item: "edit")
-            self.editTracker(tracker)
+        ) { [weak self] _ in
+            self?.analyticsService.report(event: "click", screen: "Main", item: "edit")
+            self?.editTracker(tracker)
         }
         
         let deleteAction = UIAction(
             title: NSLocalizedString("trackers.delete_action.title", comment: ""),
             attributes: .destructive
-        ) { _ in
-            self.analyticsService.report(event: "click", screen: "Main", item: "delete")
-            self.deleteTracker(tracker)
+        ) { [weak self] _ in
+            self?.analyticsService.report(event: "click", screen: "Main", item: "delete")
+            self?.deleteTracker(tracker)
         }
         
         return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
@@ -892,8 +892,8 @@ extension TrackersViewController: UISearchBarDelegate {
         searchBarWidthConstraint.constant = view.frame.width - 200
         searchBar.layoutIfNeeded()
         
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.view.layoutIfNeeded()
         }
     }
     
@@ -911,8 +911,8 @@ extension TrackersViewController: UISearchBarDelegate {
         
         // Восстанавливаем ширину строки поиска
         searchBarWidthConstraint.constant = view.frame.width - 32
-        UIView.animate(withDuration: 0.3) {
-            self.view.layoutIfNeeded()
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.view.layoutIfNeeded()
         }
     }
     

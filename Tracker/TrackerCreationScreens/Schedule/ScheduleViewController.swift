@@ -114,7 +114,7 @@ final class ScheduleViewController: UIViewController, ViewConfigurable {
     
     // MARK: - UISwitch Action
     
-    @objc func switchChanged(_ sender: UISwitch) {
+    @objc private func switchChanged(_ sender: UISwitch) {
         let day = Weekday.allCases[sender.tag]
         
         // Если переключатель включен, добавляем день в список выбранных
@@ -126,7 +126,7 @@ final class ScheduleViewController: UIViewController, ViewConfigurable {
         Logger.log("Изменение дня: \(day.rawValue) - \(sender.isOn ? "добавлен" : "удален")", level: .debug)
     }
     
-    @objc func doneButtonTapped() {
+    @objc private func doneButtonTapped() {
         onScheduleSelected?(selectedDays)
         dismiss(animated: true, completion: nil)
         Logger.log("Выбранные дни: \(selectedDays.map { $0.rawValue }.joined(separator: ", "))")

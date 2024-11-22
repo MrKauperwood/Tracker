@@ -60,7 +60,8 @@ final class FilterOptionsViewController: UIViewController, ViewConfigurable {
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = Constants.estimatedRowHeight
         
-        // Настройка скругления углов таблицы
+        tableView.register(FilterCell.self, forCellReuseIdentifier: FilterCell.identifier)
+        
         tableView.layer.cornerRadius = Constants.tableCornerRadius
         tableView.layer.maskedCorners = Constants.tableMaskedCorners
         tableView.clipsToBounds = true
@@ -70,7 +71,6 @@ final class FilterOptionsViewController: UIViewController, ViewConfigurable {
         Logger.log("Таблица для типов фильтров настроена", level: .debug)
     }
     
-    // Реализация методов протокола ViewConfigurable
     func addSubviews() {
         view.addSubview(titleLabel)
         view.addSubview(tableView)
@@ -97,13 +97,11 @@ extension FilterOptionsViewController: UITableViewDelegate, UITableViewDataSourc
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Constants.cellIdentifier, for: indexPath)
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: FilterCell.identifier, for: indexPath) as? FilterCell else {
+            fatalError("Не удалось создать FilterCell")
+        }
         let filter = filters[indexPath.row]
-        cell.textLabel?.font = .systemFont(ofSize: 17, weight: .regular)
-        cell.textLabel?.text = filter.description
-        cell.accessoryType = filter == selectedFilter ? .checkmark : .none
-        cell.selectionStyle = .none
-        cell.backgroundColor = .lbBackground
+        cell.configure(with: filter, isSelected: filter == selectedFilter)
         return cell
     }
     

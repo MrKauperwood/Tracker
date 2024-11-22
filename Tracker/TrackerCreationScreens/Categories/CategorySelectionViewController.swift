@@ -265,15 +265,15 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
         
         let editAction = UIAction(
             title: NSLocalizedString("category_selection.edit_action", comment: "")
-        ) { _ in
-            self.editCategory(category)
+        ) { [weak self] _ in
+            self?.editCategory(category)
         }
         
         let deleteAction = UIAction(
             title: NSLocalizedString("category_selection.delete_action", comment: ""),
             attributes: .destructive
-        ) { _ in
-            self.removeCategory(category)
+        ) { [weak self] _ in
+            self?.removeCategory(category)
         }
         
         return UIMenu(title: "", children: [editAction, deleteAction])
@@ -289,7 +289,6 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
             editVC?.focusTextField()
         }
         
-        // Замыкание, которое вызывается после создания категории
         editVC.onCategoryCreated = { [weak self] categoryName in
             self?.viewModel.editCategory(category, newTitle: editVC.getCategoryName)
         }
@@ -301,12 +300,12 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
         let alertController = UIAlertController(title: "", message: NSLocalizedString("category_selection.delete_confirmation", comment: ""), preferredStyle: .actionSheet)
         
         let editViewModel = CategoryCreationViewModel()
-        let deleteAction = UIAlertAction(title: NSLocalizedString("category_selection.delete_action", comment: ""), style: .destructive) { _ in
+        let deleteAction = UIAlertAction(title: NSLocalizedString("category_selection.delete_action", comment: ""), style: .destructive) { [weak self] _ in
             do {
-                self.viewModel.removeCategory(category)
-                self.viewModel.fetchCategories()
-                self.tableView.reloadData()
-                self.toggleEmptyStateVisibility()
+                self?.viewModel.removeCategory(category)
+                self?.viewModel.fetchCategories()
+                self?.tableView.reloadData()
+                self?.toggleEmptyStateVisibility()
             } catch {
                 Logger.log("Ошибка при удалении трекера: \(error)", level: .error)
             }

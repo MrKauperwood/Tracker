@@ -16,7 +16,7 @@ final class StatisticCell: UITableViewCell, ViewConfigurable {
         static let descriptionLabelFontSize: CGFloat = 12
         
         static let borderRadius: CGFloat = 16
-        static let borderWidth: CGFloat = 4 // Увеличьте ширину границы для наглядности
+        static let borderWidth: CGFloat = 4
     }
     
     // MARK: - UI Elements

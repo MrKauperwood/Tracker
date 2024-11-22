@@ -152,7 +152,7 @@ final class TrackerCell: UICollectionViewCell {
         Logger.log("Конфигурация ячейки для трекера: \(tracker.name), количество дней: \(daysCompletedText), выполнен: \(isCompleted)", level: .info)
     }
     
-    @objc func increaseDayCounter() {
+    @objc private func increaseDayCounter() {
         increaseDayCounterButtonTapped?(isTrackerCompleted ? -1 : 1)
         Logger.log("Кнопка увеличения дня нажата, текущее состояние: \(isTrackerCompleted ? "выполнено" : "не выполнено")", level: .debug)
     }

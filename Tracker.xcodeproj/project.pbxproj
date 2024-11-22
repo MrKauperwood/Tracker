@@ -18,6 +18,7 @@
 		F010A0D32CAEF23700658C89 /* UIColorMarshalling.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010A0D22CAEF23700658C89 /* UIColorMarshalling.swift */; };
 		F010A0D52CB58C1100658C89 /* WeekdayTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F010A0D42CB58C1100658C89 /* WeekdayTransformer.swift */; };
 		F03FEDD42CEE67B900988080 /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03FEDD32CEE67B700988080 /* AnalyticsService.swift */; };
+		F044E8502CF0F12E00EECF17 /* FilterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F044E84F2CF0F12C00EECF17 /* FilterCell.swift */; };
 		F06446BF2CC919450093145F /* CategorySelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06446BE2CC919410093145F /* CategorySelectionViewModel.swift */; };
 		F06446C12CC924310093145F /* CategorySelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F06446C02CC9242E0093145F /* CategorySelectionViewController.swift */; };
 		F082AAEE2CE82955004765F3 /* DateHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F082AAED2CE82953004765F3 /* DateHelper.swift */; };
@@ -89,6 +90,7 @@
 		F010A0D22CAEF23700658C89 /* UIColorMarshalling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColorMarshalling.swift; sourceTree = "<group>"; };
 		F010A0D42CB58C1100658C89 /* WeekdayTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekdayTransformer.swift; sourceTree = "<group>"; };
 		F03FEDD32CEE67B700988080 /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		F044E84F2CF0F12C00EECF17 /* FilterCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterCell.swift; sourceTree = "<group>"; };
 		F06446BE2CC919410093145F /* CategorySelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionViewModel.swift; sourceTree = "<group>"; };
 		F06446C02CC9242E0093145F /* CategorySelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategorySelectionViewController.swift; sourceTree = "<group>"; };
 		F082AAED2CE82953004765F3 /* DateHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelper.swift; sourceTree = "<group>"; };
@@ -389,6 +391,7 @@
 		F0D436F62CE6BEAF001AA9CF /* Filter */ = {
 			isa = PBXGroup;
 			children = (
+				F044E84F2CF0F12C00EECF17 /* FilterCell.swift */,
 				F0D436F12CE55A2A001AA9CF /* FilterOptionsViewController.swift */,
 			);
 			path = Filter;
@@ -607,6 +610,7 @@
 				F0A843B52CA156A90059C8A8 /* TrackerCell.swift in Sources */,
 				F0A843B12CA04A670059C8A8 /* NewHabitViewController.swift in Sources */,
 				F0C5305D2C89DF8A0071DBEA /* AppDelegate.swift in Sources */,
+				F044E8502CF0F12E00EECF17 /* FilterCell.swift in Sources */,
 				F0A843AF2CA03CF20059C8A8 /* Logger.swift in Sources */,
 				F0A843B32CA05B410059C8A8 /* SectionHeaderView.swift in Sources */,
 				F06446C12CC924310093145F /* CategorySelectionViewController.swift in Sources */,
