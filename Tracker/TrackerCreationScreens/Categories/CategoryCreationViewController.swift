@@ -2,6 +2,17 @@ import UIKit
 
 final class CategoryCreationViewController: UIViewController, ViewConfigurable, UITextFieldDelegate {
     
+    // MARK: - Public Method
+    
+    func setTitleAndCategory(_ title: String, andCategoryName categoryName: String) {
+        titleLabel.text = title
+        textField.text = categoryName
+    }
+    
+    var getCategoryName: String {
+        return textField.text ?? ""
+    }
+    
     // MARK: - UI Elements
     
     private lazy var titleLabel: UILabel = CategoryCreationViewController.makeTitleLabel()
@@ -15,6 +26,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     private let viewModel: CategoryCreationViewModel
     var onCategoryCreated: ((String) -> Void)?
+    var onViewDidAppear: (() -> Void)?
     
     // MARK: - Initializer
     
@@ -28,6 +40,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        onViewDidAppear?()
         setupView()
         setupBindings()
         
@@ -37,7 +50,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     // MARK: - Private Methods
     
     private func setupView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         setupUI()
         addTapGesture()
     }
@@ -76,6 +89,14 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
         Logger.log("Констрейнты для элементов интерфейса установлены", level: .debug)
     }
     
+    func focusTextField() {
+        textField.becomeFirstResponder()
+        if let text = textField.text {
+            let endPosition = textField.endOfDocument
+            textField.selectedTextRange = textField.textRange(from: endPosition, to: endPosition)
+        }
+    }
+    
     private func configureClearButton() {
         clearButtonContainer.addSubview(clearButton)
         textField.rightView = clearButtonContainer
@@ -89,7 +110,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
         // Bindings с ViewModel для обновления состояния кнопки и показа ошибок
         viewModel.isDoneButtonEnabled = { [weak self] isEnabled in
             self?.doneButton.isEnabled = isEnabled
-            self?.doneButton.backgroundColor = isEnabled ? UIColor(named: "LB_black") : UIColor(named: "LB_grey")
+            self?.doneButton.backgroundColor = isEnabled ? UIColor(named: "LB_blackAndWhite") : UIColor(named: "LB_grey")
         }
         
         viewModel.errorMessage = { [weak self] message in
@@ -139,7 +160,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     private static func makeTitleLabel() -> UILabel {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Новая категория"
+        titleLabel.text = NSLocalizedString("category_creation.title", comment: "")
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         return titleLabel
@@ -147,7 +168,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     private static func makeTextField() -> UITextField {
         let textField = UITextField()
-        textField.placeholder = "Введите название категории"
+        textField.placeholder = NSLocalizedString("category_creation.text_field.placeholder", comment: "")
         textField.returnKeyType = .go
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.heightAnchor.constraint(equalToConstant: 75).isActive = true
@@ -183,7 +204,7 @@ final class CategoryCreationViewController: UIViewController, ViewConfigurable, 
     
     private static func makeDoneButton() -> UIButton {
         let button = UIButton(type: .system)
-        button.setTitle("Готово", for: .normal)
+        button.setTitle(NSLocalizedString("category_creation.done_button.title", comment: ""), for: .normal)
         button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
         button.backgroundColor = UIColor(named: "LB_grey")

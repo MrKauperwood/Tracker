@@ -2,15 +2,13 @@ import UIKit
 
 final class TrackerCell: UICollectionViewCell {
     
-    var increaseDayCounterButtonTapped: ((Int) -> Void)? // Обработчик нажатия на кнопку
+    var increaseDayCounterButtonTapped: ((Int) -> Void)?
     private var isTrackerCompleted: Bool = false
     
-    
-    // Первый контейнер для emoji и name
-    private let topContainerView: UIView = {
+    let topContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .lbCS5Green // Зеленый фон для первого контейнера
+        view.backgroundColor = .lbCS5Green
         view.layer.cornerRadius = 12
         view.layer.masksToBounds = true
         return view
@@ -23,11 +21,18 @@ final class TrackerCell: UICollectionViewCell {
         return label
     }()
     
+    private let pinIconView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "PinIcon"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.isHidden = true
+        return imageView
+    }()
+    
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-        label.textColor = .lbWhite
+        label.textColor = .lbWhiteAndWhite
         label.numberOfLines = 0
         return label
     }()
@@ -37,10 +42,10 @@ final class TrackerCell: UICollectionViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         view.layer.cornerRadius = 16
         view.layer.masksToBounds = true
+        view.backgroundColor = .lbWhite
         return view
     }()
     
-    // Второй контейнер для bottomStackView
     private let bottomContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -51,16 +56,16 @@ final class TrackerCell: UICollectionViewCell {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = UIFont.systemFont(ofSize: 12, weight: .regular)
-        label.textColor = .lbBlack
+        label.textColor = .lbBlackAndWhite
         return label
     }()
     
     private let increaseDayButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("+", for: .normal)
-        button.setTitleColor(.white, for: .normal) // Белый текст
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .regular) // Настраиваем шрифт для плюса
-        button.layer.cornerRadius = 17 // Круглая форма
+        button.setTitleColor(.lbWhite, for: .normal) //
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .regular)
+        button.layer.cornerRadius = 17
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -80,6 +85,7 @@ final class TrackerCell: UICollectionViewCell {
         
         topContainerView.addSubview(emojiLabel)
         topContainerView.addSubview(nameLabel)
+        topContainerView.addSubview(pinIconView)
         
         bottomStackView.addArrangedSubview(daysLabel)
         bottomStackView.addArrangedSubview(increaseDayButton)
@@ -98,9 +104,11 @@ final class TrackerCell: UICollectionViewCell {
             topContainerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             topContainerView.heightAnchor.constraint(equalToConstant: 90),
             
-            // Emoji и Name внутри первого контейнера
             emojiLabel.topAnchor.constraint(equalTo: topContainerView.topAnchor, constant: 12),
             emojiLabel.leadingAnchor.constraint(equalTo: topContainerView.leadingAnchor, constant: 12),
+            
+            pinIconView.topAnchor.constraint(equalTo: topContainerView.topAnchor, constant: 12),
+            pinIconView.trailingAnchor.constraint(equalTo: topContainerView.trailingAnchor, constant: -12),
             
             nameLabel.bottomAnchor.constraint(equalTo: topContainerView.bottomAnchor, constant: -12),
             nameLabel.leadingAnchor.constraint(equalTo: topContainerView.leadingAnchor, constant: 12),
@@ -134,17 +142,17 @@ final class TrackerCell: UICollectionViewCell {
         nameLabel.text = tracker.name
         topContainerView.backgroundColor = tracker.color
         
-        // Устанавливаем состояние
         isTrackerCompleted = isCompleted
         
-        // Обновляем UI в зависимости от состояния трекера
         updateButtonAppearance()
+        
+        pinIconView.isHidden = !tracker.isPinned
         
         daysLabel.text = daysCompletedText
         Logger.log("Конфигурация ячейки для трекера: \(tracker.name), количество дней: \(daysCompletedText), выполнен: \(isCompleted)", level: .info)
     }
     
-    @objc func increaseDayCounter() {
+    @objc private func increaseDayCounter() {
         increaseDayCounterButtonTapped?(isTrackerCompleted ? -1 : 1)
         Logger.log("Кнопка увеличения дня нажата, текущее состояние: \(isTrackerCompleted ? "выполнено" : "не выполнено")", level: .debug)
     }
@@ -153,9 +161,9 @@ final class TrackerCell: UICollectionViewCell {
         if isTrackerCompleted {
             let doneImage = UIImage(named: "DoneButton")
             increaseDayButton.setImage(doneImage, for: .normal)
-            increaseDayButton.tintColor = .white
+            increaseDayButton.tintColor = .lbWhite
             increaseDayButton.setTitle(nil, for: .normal)
-            increaseDayButton.imageView?.contentMode = .scaleAspectFit // Устанавливаем корректный режим отображения
+            increaseDayButton.imageView?.contentMode = .scaleAspectFit
             
             if let imageView = increaseDayButton.imageView {
                 increaseDayButton.bringSubviewToFront(imageView)

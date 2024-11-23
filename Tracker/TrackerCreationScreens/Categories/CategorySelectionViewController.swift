@@ -8,7 +8,7 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        titleLabel.text = "Категория"
+        titleLabel.text = NSLocalizedString("category_selection.title", comment: "")
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         return titleLabel
@@ -21,15 +21,15 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
     
     private lazy var addButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Добавить категорию", for: .normal)
+        button.setTitle(NSLocalizedString("category_selection.add_button", comment: ""), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
-        button.setTitleColor(.white, for: .normal)
+        button.setTitleColor(.lbWhite, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16)
         
-        button.backgroundColor = .lbBlack
+        button.backgroundColor = .lbBlackAndWhite
         button.layer.cornerRadius = 16
         
         button.addTarget(self, action: #selector(addButtonTapped), for: .touchUpInside)
@@ -54,10 +54,10 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
         paragraphStyle.alignment = .center
         
         let attributedString = NSAttributedString(
-            string: "Привычки и события можно объединить по смыслу",
+            string: NSLocalizedString("category_selection.empty_state_text", comment: ""),
             attributes: [
                 .font: UIFont.systemFont(ofSize: 12, weight: .medium),
-                .foregroundColor: UIColor.lbBlack,
+                .foregroundColor: UIColor.lbBlackAndWhite,
                 .paragraphStyle: paragraphStyle
             ]
         )
@@ -98,8 +98,8 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
     // MARK: - Private Methods
     
     private func setupUI() {
-        view.backgroundColor = .white
-
+        view.backgroundColor = .lbWhite
+        
         setupTableView()
         addSubviews()
         addConstraints()
@@ -180,7 +180,6 @@ final class CategorySelectionViewController: UIViewController, ViewConfigurable 
     }
     
     private func setupBindings() {
-        // Биндинги для ViewModel
         viewModel.categoriesDidChange = { [weak self] categories in
             
             self?.toggleEmptyStateVisibility()
@@ -252,5 +251,72 @@ extension CategorySelectionViewController: UITableViewDelegate, UITableViewDataS
         
         // Возвращаемся на экран создания привычки
         dismiss(animated: true, completion: nil)
+    }
+    
+    func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+        let category = viewModel.categories[indexPath.row]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            return self.makeContextMenu(for: category)
+        }
+    }
+    
+    private func makeContextMenu(for category: TrackerCategory) -> UIMenu {
+        
+        let editAction = UIAction(
+            title: NSLocalizedString("category_selection.edit_action", comment: "")
+        ) { [weak self] _ in
+            self?.editCategory(category)
+        }
+        
+        let deleteAction = UIAction(
+            title: NSLocalizedString("category_selection.delete_action", comment: ""),
+            attributes: .destructive
+        ) { [weak self] _ in
+            self?.removeCategory(category)
+        }
+        
+        return UIMenu(title: "", children: [editAction, deleteAction])
+    }
+    
+    private func editCategory(_ category: TrackerCategory) {
+        let editViewModel = CategoryCreationViewModel()
+        let editVC = CategoryCreationViewController(viewModel: editViewModel)
+        
+        editVC.setTitleAndCategory("Редактирование категории", andCategoryName: category.title)
+        
+        editVC.onViewDidAppear = { [weak editVC] in
+            editVC?.focusTextField()
+        }
+        
+        editVC.onCategoryCreated = { [weak self] categoryName in
+            self?.viewModel.editCategory(category, newTitle: editVC.getCategoryName)
+        }
+        
+        present(editVC, animated: true, completion: nil)
+    }
+    
+    private func removeCategory(_ category: TrackerCategory) {
+        let alertController = UIAlertController(title: "", message: NSLocalizedString("category_selection.delete_confirmation", comment: ""), preferredStyle: .actionSheet)
+        
+        let editViewModel = CategoryCreationViewModel()
+        let deleteAction = UIAlertAction(title: NSLocalizedString("category_selection.delete_action", comment: ""), style: .destructive) { [weak self] _ in
+            do {
+                self?.viewModel.removeCategory(category)
+                self?.viewModel.fetchCategories()
+                self?.tableView.reloadData()
+                self?.toggleEmptyStateVisibility()
+            } catch {
+                Logger.log("Ошибка при удалении трекера: \(error)", level: .error)
+            }
+            
+        }
+        
+        let cancelAction = UIAlertAction(title: NSLocalizedString("category_selection.cancel_action", comment: ""), style: .cancel, handler: nil)
+        
+        alertController.addAction(deleteAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
     }
 }

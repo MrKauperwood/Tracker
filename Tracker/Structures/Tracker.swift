@@ -8,46 +8,51 @@ struct Tracker {
     let emoji: String
     let schedule: [Weekday]
     let trackerType: TrackerType
+    let isPinned: Bool
     
-    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday], trackerType: TrackerType) {
+    init(id: UUID, name: String, color: UIColor, emoji: String, schedule: [Weekday], trackerType: TrackerType, isPinned: Bool = false) {
         self.id = id
         self.name = name
         self.color = color
         self.emoji = emoji
         self.schedule = schedule
         self.trackerType = trackerType
+        self.isPinned = isPinned
     }
 }
 
 enum Weekday: String, CaseIterable {
-    case monday = "Понедельник"
-    case tuesday = "Вторник"
-    case wednesday = "Среда"
-    case thursday = "Четверг"
-    case friday = "Пятница"
-    case saturday = "Суббота"
-    case sunday = "Воскресенье"
+    case monday
+    case tuesday
+    case wednesday
+    case thursday
+    case friday
+    case saturday
+    case sunday
+
+    var localizedName: String {
+        return NSLocalizedString(self.rawValue, comment: "")
+    }
     
     var shortName: String {
         switch self {
         case .monday:
-            return "Пн"
+            return NSLocalizedString("monday_short", comment: "")
         case .tuesday:
-            return "Вт"
+            return NSLocalizedString("tuesday_short", comment: "")
         case .wednesday:
-            return "Ср"
+            return NSLocalizedString("wednesday_short", comment: "")
         case .thursday:
-            return "Чт"
+            return NSLocalizedString("thursday_short", comment: "")
         case .friday:
-            return "Пт"
+            return NSLocalizedString("friday_short", comment: "")
         case .saturday:
-            return "Сб"
+            return NSLocalizedString("saturday_short", comment: "")
         case .sunday:
-            return "Вс"
+            return NSLocalizedString("sunday_short", comment: "")
         }
     }
     
-    // Метод для упорядочивания дней недели
     static let orderedWeekdays: [Weekday] = [
         .monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday
     ]
@@ -56,7 +61,7 @@ enum Weekday: String, CaseIterable {
 extension Weekday {
     static func from(date: Date) -> Weekday? {
         let calendar = Calendar.current
-        let weekdayNumber = calendar.component(.weekday, from: date) // 1 - Воскресенье, 2 - Понедельник и т.д.
+        let weekdayNumber = calendar.component(.weekday, from: date)
         
         switch weekdayNumber {
         case 1:
@@ -76,5 +81,23 @@ extension Weekday {
         default:
             return nil
         }
+    }
+}
+
+extension Tracker {
+    func togglePinnedStatus() -> Tracker {
+        return withPinnedStatus(!self.isPinned)
+    }
+    
+    func withPinnedStatus(_ pinned: Bool) -> Tracker {
+        return Tracker(
+            id: self.id,
+            name: self.name,
+            color: self.color,
+            emoji: self.emoji,
+            schedule: self.schedule,
+            trackerType: self.trackerType,
+            isPinned: pinned
+        )
     }
 }

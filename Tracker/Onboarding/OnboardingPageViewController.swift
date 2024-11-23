@@ -21,10 +21,15 @@ final class OnboardingPageViewController: UIViewController {
     }
     
     private func setupOnboardingPages() {
-        let firstPage = OnboardingContentViewController(titleText: "Отслеживайте только то, что хотите", backgroundImageName: "LB_Onboarding1")
-        let secondPage = OnboardingContentViewController(titleText: "Даже если это не литры воды и йога", backgroundImageName: "LB_Onboarding2")
+        let firstPage = OnboardingContentViewController(
+            titleText: NSLocalizedString("onboarding.page1.title", comment: ""),
+            backgroundImageName: "LB_Onboarding1"
+        )
+        let secondPage = OnboardingContentViewController(
+            titleText: NSLocalizedString("onboarding.page2.title", comment: ""),
+            backgroundImageName: "LB_Onboarding2"
+        )
         
-        // Определяем действие кнопки для каждой страницы
         firstPage.buttonAction = { [weak self] in
             self?.completeOnboarding()
         }

@@ -20,7 +20,7 @@ final class CategoryHeaderView: UICollectionReusableView {
     private func setupViews() {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .bold)
-        titleLabel.textColor = .lbBlack
+        titleLabel.textColor = .lbBlackAndWhite
         
         addSubview(titleLabel)
         

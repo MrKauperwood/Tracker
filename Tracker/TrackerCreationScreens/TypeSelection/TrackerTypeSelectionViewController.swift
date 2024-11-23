@@ -12,7 +12,7 @@ final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurab
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Создание трекера"
+        label.text = NSLocalizedString("tracker_type_selection.title", comment: "")
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textAlignment = .center
         return label
@@ -21,8 +21,8 @@ final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurab
     private lazy var habitButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Привычка", for: .normal)
-        button.backgroundColor = .lbBlack
+        button.setTitle(NSLocalizedString("tracker_type_selection.habit_button", comment: ""), for: .normal)
+        button.backgroundColor = .lbBlackAndWhite
         button.setTitleColor(.lbWhite, for: .normal)
         button.titleLabel?.font = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.layer.cornerRadius = 16
@@ -34,8 +34,8 @@ final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurab
     private lazy var irregularButton: UIButton = {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Нерегулярное событие", for: .normal)
-        button.backgroundColor = .lbBlack
+        button.setTitle(NSLocalizedString("tracker_type_selection.irregular_button", comment: ""), for: .normal)
+        button.backgroundColor = .lbBlackAndWhite
         button.setTitleColor(.lbWhite, for: .normal)
         button.titleLabel?.font = UIFont(name: "SFProText-Medium", size: 16) ?? UIFont.systemFont(ofSize: 16, weight: .medium)
         button.layer.cornerRadius = 16
@@ -50,7 +50,7 @@ final class TrackerTypeSelectionViewController: UIViewController, ViewConfigurab
         super.viewDidLoad()
         Logger.log("Экран выбора типа трекера загружен")
         
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         setupUI()
     }
     

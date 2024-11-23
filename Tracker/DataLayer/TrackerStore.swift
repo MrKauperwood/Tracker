@@ -6,7 +6,6 @@ protocol TrackerStoreDelegate: AnyObject {
     func store(_ store: TrackerStore, didUpdate update: TrackerStoreUpdate)
 }
 
-// Структура для передачи информации об изменениях
 struct TrackerStoreUpdate {
     struct Move: Hashable {
         let oldIndex: Int
@@ -25,7 +24,6 @@ final class TrackerStore: NSObject {
     // Делегат для передачи обновлений в контроллер
     weak var delegate: TrackerStoreDelegate?
     
-    // Индексы для отслеживания изменений
     private var insertedIndexes: IndexSet?
     private var deletedIndexes: IndexSet?
     private var updatedIndexes: IndexSet?
@@ -71,6 +69,7 @@ final class TrackerStore: NSObject {
         trackerEntity.name = tracker.name
         trackerEntity.color = UIColorMarshalling().hexString(from: tracker.color)
         trackerEntity.emoji = tracker.emoji
+        trackerEntity.isPinned = tracker.isPinned
         
         // Сохраняем schedule как массив строк, который будет автоматически преобразован трансформером
         trackerEntity.schedule = tracker.schedule.map { $0.rawValue } as NSObject
@@ -93,6 +92,48 @@ final class TrackerStore: NSObject {
         Logger.log("Новый трекер c именем : \"\(tracker.name)\" и категорией \"\(category.title)\" добавлен в CoreData")
     }
     
+    func updateTracker(with id: UUID, updatedTracker: Tracker, updatedCategoryName: String) throws {
+        // Создаем запрос на выборку трекера с заданным id
+        let request = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        if let trackerEntity = try context.fetch(request).first {
+            trackerEntity.name = updatedTracker.name
+            trackerEntity.color = UIColorMarshalling().hexString(from: updatedTracker.color)
+            trackerEntity.emoji = updatedTracker.emoji
+            trackerEntity.isPinned = updatedTracker.isPinned
+            trackerEntity.schedule = updatedTracker.schedule.map { $0.rawValue } as NSObject
+            trackerEntity.trackerType = updatedTracker.trackerType.rawValue
+            
+            let categoryRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+            categoryRequest.predicate = NSPredicate(format: "title == %@", updatedCategoryName)
+            
+            if let newCategory = try context.fetch(categoryRequest).first {
+                if !(newCategory.trackers?.contains { ($0 as? TrackerCoreData)?.id == id } ?? false) {
+                    // Удаляем трекер из предыдущей категории
+                    if let oldCategory = trackerEntity.category {
+                        oldCategory.removeFromTrackers(trackerEntity)
+                    }
+                    // Добавляем трекер в новую категорию
+                    newCategory.addToTrackers(trackerEntity)
+                    trackerEntity.category = newCategory
+                }
+            } else {
+                Logger.log("Категория с именем \(updatedCategoryName) не найдена", level: .error)
+            }
+            
+            do {
+                try context.save()
+                Logger.log("Трекер с именем \"\(updatedTracker.name)\" успешно обновлен в Core Data")
+            } catch {
+                Logger.log("Ошибка при сохранении изменений трекера: \(error)", level: .error)
+                throw error
+            }
+        } else {
+            Logger.log("Трекер с id \(id) не найден для обновления", level: .error)
+        }
+    }
+    
     func getTracker(by id: UUID) throws -> Tracker? {
         let request = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
@@ -105,13 +146,15 @@ final class TrackerStore: NSObject {
             
             let color = UIColorMarshalling().color(from: colorHex)
             
+            let isPinned = entity.isPinned
+            
             // Извлекаем schedule как массив строк и преобразуем обратно в Weekday
             let scheduleRaw = entity.schedule as? [String] ?? []
             let schedule = scheduleRaw.compactMap { Weekday(rawValue: $0) }
             
             let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
-            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
+            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType, isPinned: isPinned)
         }
         
         return nil
@@ -129,6 +172,7 @@ final class TrackerStore: NSObject {
                 Logger.log("Значения для трекера - nil в базе данных", level: .error)
                 return nil
             }
+            let isPinned = entity.isPinned
             
             // Конвертируем цвет
             let color = UIColorMarshalling().color(from: colorHex)
@@ -139,7 +183,7 @@ final class TrackerStore: NSObject {
             
             let trackerType = entity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
-            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
+            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType, isPinned: isPinned)
         }
     }
     
@@ -157,6 +201,24 @@ final class TrackerStore: NSObject {
         let results = try context.fetch(request)
         results.forEach { context.delete($0) }
         try context.save()
+    }
+    
+    func updatePinStatus(for tracker: Tracker, isPinned: Bool) throws {
+        let request = TrackerCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        
+        if let trackerEntity = try context.fetch(request).first {
+            trackerEntity.isPinned = isPinned
+            
+            do {
+                try context.save()
+            } catch {
+                Logger.log("Ошибка при сохранении context: \(error)", level: .error)
+                throw error
+            }
+        } else {
+            Logger.log("Трекер с id \(tracker.id) не найден", level: .error)
+        }
     }
     
     // Преобразование Core Data объекта в модель Tracker

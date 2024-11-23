@@ -75,6 +75,22 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
+    func editCategory(_ category: TrackerCategory, with newTitle: String) throws {
+        let request = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "title == %@", category.title)
+        
+        do {
+            if let result = try context.fetch(request).first {
+                result.title = newTitle
+                try context.save()
+                try fetchedResultsController.performFetch()
+            }
+        } catch {
+            print("Ошибка при редактировании категории: \(error)")
+            throw error
+        }
+    }
+    
     func getCategories() -> [TrackerCategory] {
         guard let objects = fetchedResultsController.fetchedObjects else { return [] }
         return objects.map { TrackerCategory(title: $0.title ?? "", trackers: []) }
@@ -95,14 +111,14 @@ final class TrackerCategoryStore: NSObject {
                 return nil
             }
             let color = UIColorMarshalling().color(from: colorHex)
-            
+            let isPinned = trackerEntity.isPinned
             
             // Извлечение schedule как массив строк и преобразование в массив Weekday
             let schedule: [Weekday] = (trackerEntity.schedule as? [String])?.compactMap { Weekday(rawValue: $0) } ?? []
             
             let trackerType = trackerEntity.trackerType == TrackerType.habit.rawValue ? TrackerType.habit : TrackerType.irregular
             
-            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType)
+            return Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule, trackerType: trackerType, isPinned: isPinned)
         } ?? []
         
         return TrackerCategory(title: title, trackers: trackers)
@@ -115,6 +131,7 @@ final class TrackerCategoryStore: NSObject {
             context.delete(result)
             do {
                 try context.save()
+                try fetchedResultsController.performFetch()
             } catch {
                 Logger.log("Ошибка при сохранении категории: \(error)", level: .error)
                 throw error

@@ -8,6 +8,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        AnalyticsService.activate()
         ValueTransformer.setValueTransformer(WeekdayTransformer(), forName: NSValueTransformerName("WeekdayTransformer"))
         
         window = UIWindow()

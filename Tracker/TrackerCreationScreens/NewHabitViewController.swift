@@ -9,14 +9,45 @@ final class NewHabitViewController: UIViewController {
     var trackerCategoryStore: TrackerCategoryStore!
     var trackerRecordStore: TrackerRecordStore!
     
-    // MARK: - Private Properties
+    var selectedSchedule: [Weekday] = []
+    var selectedEmoji: String?
+    var selectedColor: UIColor?
+    var selectedCategory: TrackerCategory?
     
-    private var selectedSchedule: [Weekday] = []
-    private var selectedEmoji: String?
-    private var selectedColor: UIColor?
-    private var selectedCategory: TrackerCategory?
+    var isEditingMode: Bool = false
+    var existingTrackerId: UUID?
     
     // MARK: - UI Elements
+    
+    public lazy var textField: UITextField = {
+        let textField = UITextField()
+        textField.placeholder = NSLocalizedString("new_habit.text_field.placeholder", comment: "")
+        textField.returnKeyType = .go
+        
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.heightAnchor.constraint(equalToConstant: 75).isActive = true
+        
+        // Внутренние отступы (padding)
+        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0)) // отступ слева
+        textField.leftViewMode = .always
+        
+        textField.backgroundColor = .lbBackground
+        textField.layer.cornerRadius = 16
+        textField.layer.masksToBounds = true
+        
+        return textField
+    }()
+    
+    public lazy var counterLabel: UILabel = {
+        let counterLabel = UILabel()
+        counterLabel.translatesAutoresizingMaskIntoConstraints = false
+        counterLabel.text = "0"
+        
+        counterLabel.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        counterLabel.textAlignment = .center
+        
+        return counterLabel
+    }()
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -35,31 +66,13 @@ final class NewHabitViewController: UIViewController {
     private lazy var titleLabel: UILabel = {
         let titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Новая привычка"
+        titleLabel.text = isEditingMode
+        ? NSLocalizedString("new_habit.title.edit_habit", comment: "") : NSLocalizedString("new_habit.title.new_habit", comment: "")
         
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textAlignment = .center
         
         return titleLabel
-    }()
-    
-    private lazy var textField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "Введите название трекера"
-        textField.returnKeyType = .go
-        
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.heightAnchor.constraint(equalToConstant: 75).isActive = true
-        
-        // Внутренние отступы (padding)
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0)) // отступ слева
-        textField.leftViewMode = .always
-        
-        textField.backgroundColor = .lbBackground
-        textField.layer.cornerRadius = 16
-        textField.layer.masksToBounds = true
-        
-        return textField
     }()
     
     private lazy var errorLabel: UILabel = {
@@ -112,10 +125,10 @@ final class NewHabitViewController: UIViewController {
     
     private lazy var cancelButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Отменить", for: .normal)
+        button.setTitle(NSLocalizedString("new_habit.cancel_button.title", comment: ""), for: .normal)
         
-        button.setTitleColor(UIColor(named: "LB_red"), for: .normal) // Применяем цвет текста
-        button.layer.borderColor = UIColor(named: "LB_red")?.cgColor // Цвет бордера из ассетов
+        button.setTitleColor(UIColor(named: "LB_red"), for: .normal)
+        button.layer.borderColor = UIColor(named: "LB_red")?.cgColor
         button.layer.borderWidth = 1 // Ширина бордера
         button.layer.cornerRadius = 16 // Радиус скругления
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -128,7 +141,12 @@ final class NewHabitViewController: UIViewController {
     private lazy var createButton: UIButton = {
         
         let button = UIButton(type: .system)
-        button.setTitle("Создать", for: .normal)
+        if !isEditingMode {
+            button.setTitle(NSLocalizedString("new_habit.create_button.title.create", comment: ""), for: .normal)
+        } else {
+            button.setTitle(NSLocalizedString("new_habit.create_button.title.save", comment: ""), for: .normal)
+        }
+        
         button.setTitleColor(UIColor(named: "LB_white"), for: .normal)
         button.layer.borderColor = UIColor(named: "LB_white")?.cgColor
         button.backgroundColor = UIColor(named: "LB_grey")
@@ -151,7 +169,9 @@ final class NewHabitViewController: UIViewController {
     }()
     
     private var tableData: [String] {
-        return trackerType == .habit ? ["Категория", "Расписание"] : ["Категория"]
+        return trackerType == .habit ? [
+            NSLocalizedString("new_habit.table_row.category", comment: ""),
+            NSLocalizedString("new_habit.table_row.schedule", comment: "")] : [NSLocalizedString("new_habit.table_row.category", comment: "")]
     }
     private let emojis = ["😊", "😻", "🌸", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🏅", "🎸", "🏖", "😪"]
     private let colors: [UIColor] = [
@@ -166,7 +186,15 @@ final class NewHabitViewController: UIViewController {
         super.viewDidLoad()
         Logger.log("Экран создания новой привычки загружен")
         
-        titleLabel.text = trackerType == .habit ? "Новая привычка" : "Новое нерегулярное событие"
+        titleLabel.text = trackerType == .habit
+        ? NSLocalizedString("new_habit.title.new_habit", comment: "")
+        : NSLocalizedString("new_habit.title.new_irregular_event", comment: "")
+        if isEditingMode {
+            titleLabel.text = NSLocalizedString("new_habit.title.edit_habit", comment: "")
+            counterLabel.isHidden = false
+        } else {
+            counterLabel.isHidden = true
+        }
         
         clearButton.translatesAutoresizingMaskIntoConstraints = false
         clearButtonContainer.addSubview(clearButton)
@@ -207,7 +235,7 @@ final class NewHabitViewController: UIViewController {
         
         tableView.register(CustomTableViewCellForNewHabit.self, forCellReuseIdentifier: "CustomCellForNewHabit")
         
-        view.backgroundColor = .white
+        view.backgroundColor = .lbWhite
         
         // Setup table view
         tableView.delegate = self
@@ -238,6 +266,7 @@ final class NewHabitViewController: UIViewController {
         
         // Добавляем все элементы в contentStackView
         contentStackView.addArrangedSubview(titleLabel)
+        contentStackView.addArrangedSubview(counterLabel)
         contentStackView.addArrangedSubview(textField)
         contentStackView.addArrangedSubview(errorLabel)
         contentStackView.addArrangedSubview(tableView)
@@ -255,6 +284,11 @@ final class NewHabitViewController: UIViewController {
         ])
         
         // Констрейнты для contentStackView
+        NSLayoutConstraint.activate([
+            counterLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 40),
+            counterLabel.bottomAnchor.constraint(equalTo: textField.topAnchor, constant: -40),
+        ])
+        
         NSLayoutConstraint.activate([
             contentStackView.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 30),
             contentStackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 16),
@@ -297,7 +331,7 @@ final class NewHabitViewController: UIViewController {
         
         // Проверяем длину текста
         if let text = textField.text, text.count > 38 {
-            errorLabel.text = "Ограничение 38 символов"
+            errorLabel.text = NSLocalizedString("new_habit.error_label.text", comment: "")
             errorLabel.isHidden = false
         } else {
             errorLabel.isHidden = true
@@ -323,7 +357,7 @@ final class NewHabitViewController: UIViewController {
         
         if isTrackerNameValid && isScheduleSelected && isCategorySelected && isEmojiSelected && isColorSelected {
             createButton.isEnabled = true
-            createButton.backgroundColor = UIColor(named: "LB_black")
+            createButton.backgroundColor = UIColor(named: "LB_blackAndWhite")
         } else {
             createButton.isEnabled = false
             createButton.backgroundColor = UIColor(named: "LB_grey")
@@ -336,9 +370,9 @@ final class NewHabitViewController: UIViewController {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: SectionHeaderView.identifier, for: indexPath) as! SectionHeaderView
         
         if indexPath.section == 0 {
-            header.title = "Emoji"
+            header.title = NSLocalizedString("new_habit.section_header.emoji", comment: "")
         } else {
-            header.title = "Цвет"
+            header.title = NSLocalizedString("new_habit.section_header.color", comment: "")
         }
         
         return header
@@ -366,7 +400,7 @@ final class NewHabitViewController: UIViewController {
         return totalHeight
     }
     
-    @objc func createButtonTapped() {
+    @objc private func createButtonTapped() {
         
         // Проверяем, введено ли имя трекера
         guard let trackerName = textField.text, !trackerName.isEmpty else {
@@ -386,9 +420,10 @@ final class NewHabitViewController: UIViewController {
             return
         }
         
-        // Создаем новый трекер
+        let trackerID = isEditingMode ? (existingTrackerId ?? UUID()) : UUID()
+        
         let newTracker = Tracker(
-            id: UUID(),
+            id: trackerID,
             name: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
@@ -396,12 +431,14 @@ final class NewHabitViewController: UIViewController {
             trackerType: trackerType
         )
         
-        // Создаем объект категории
-        let newCategory = TrackerCategory(title: categoryTitle, trackers: [])
-        
-        // Затем добавляем трекер в CoreData
         do {
-            try trackerStore.addTracker(newTracker, to: newCategory)
+            if isEditingMode {
+                let updatedCategoryName = categoryTitle
+                try trackerStore.updateTracker(with: newTracker.id, updatedTracker: newTracker, updatedCategoryName: updatedCategoryName)
+            } else {
+                let newCategory = TrackerCategory(title: categoryTitle, trackers: [])
+                try trackerStore.addTracker(newTracker, to: newCategory)
+            }
             
         } catch {
             Logger.log("Ошибка при сохранении трекера: \(error)", level: .error)
@@ -426,11 +463,14 @@ final class NewHabitViewController: UIViewController {
             parentVC.addTracker(newTracker, to: categoryTitle)
             parentVC.reloadData() // Обновляем данные на экране
             dismiss(animated: true, completion: nil) // Закрываем экран создания
-        } else {
-            // Обработка случая, если контроллер не был найден
-            print("Не удалось найти TrackersViewController")
+        } else if let tabBarController = self.presentingViewController as? TabBarController,
+                  let navController = tabBarController.selectedViewController as? UINavigationController,
+                  let parentVC = navController.viewControllers.first(where: { $0 is TrackersViewController }) as? TrackersViewController {
+            parentVC.reloadData() // Обновляем данные на экране
+            isEditingMode = false
+            dismiss(animated: true, completion: nil) // Закрываем экран создания
         }
-        // Закрываем все модальные окна
+        
         presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
         
         Logger.log("Создан новый трекер: \(trackerName) с эмодзи \(selectedEmoji) и цветом \(selectedColor)")
@@ -515,7 +555,7 @@ extension NewHabitViewController: UITableViewDataSource {
             if trackerType == .habit {
                 // Если это привычка, показываем расписание
                 if selectedSchedule.count == Weekday.allCases.count {
-                    cell.configureDescription("Каждый день")
+                    cell.configureDescription(NSLocalizedString("new_habit.schedule.every_day", comment: ""))
                 } else {
                     let sortedDays = selectedSchedule.sorted { Weekday.orderedWeekdays.firstIndex(of: $0)! < Weekday.orderedWeekdays.firstIndex(of: $1)! }
                     cell.configureDescription(sortedDays.isEmpty ? "" : sortedDays.map { $0.shortName }.joined(separator: ", "))
